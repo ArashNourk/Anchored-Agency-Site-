@@ -58,7 +58,8 @@ apps/p10render   offline scenario renderer
 web/             browser app: wasm C API, UI, build script, prebuilt dist/
 tests/           engine self-validation tests
 validation/      scenario scripts for hardware/software comparison
-tools/analysis/  measurement, comparison and calibration-fitting tools (numpy)
+tools/validate/  hardware validation framework: capture, features, fitting, reports
+tools/analysis/  ad-hoc measurement tools (numpy)
 docs/            architecture, assumption register, validation procedure, status
 ```
 
@@ -77,5 +78,6 @@ python3 tools/analysis/p10analyze.py spectrum polymod.wav --start 0.5 --dur 0.8
 
 * [Architecture](docs/ARCHITECTURE.md): module split, signal path, band-limiting, filter solving, Vintage.
 * [Assumption register](docs/ASSUMPTIONS.md): every uncertain value, why it was chosen, how to measure it.
+* [Validation framework](docs/VALIDATION_FRAMEWORK.md): automated hardware capture, feature extraction, calibration fitting and residual reports (`python3 -m tools.validate`).
 * [Validation procedure](docs/VALIDATION.md): capture setup, the 13 comparisons, acceptance targets.
 * [Development status](docs/DEVELOPMENT.md): progress against the development sequence, known gaps.

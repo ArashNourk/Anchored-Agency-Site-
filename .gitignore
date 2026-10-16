@@ -2,3 +2,5 @@ build/
 *.wav
 *.mid
 __pycache__/
+validation/captures/
+__pycache__/

@@ -153,6 +153,15 @@ std::vector<CalibrationModel::Entry> CalibrationModel::entries() {
     add("alloc.stackFixedHalves", allocStackFixedHalves, "A-VAL-04");
     add("alloc.splitFixedHalves", allocSplitFixedHalves, "A-VAL-05");
     add("out.gain", outputGain, "A-OUT-01");
+    for (int v = 0; v < kUnitVoices; ++v) {
+        const std::string pre = "unit.v" + std::to_string(v + 1) + ".";
+        e.push_back({pre + "tuneCentsA", &unitTuneCentsA[v], "A-UNIT-01"});
+        e.push_back({pre + "tuneCentsB", &unitTuneCentsB[v], "A-UNIT-01"});
+        e.push_back({pre + "cutoffSemis", &unitCutoffSemis[v], "A-UNIT-01"});
+        e.push_back({pre + "filterEnvTimeLn", &unitFilterEnvTimeLn[v], "A-UNIT-01"});
+        e.push_back({pre + "ampEnvTimeLn", &unitAmpEnvTimeLn[v], "A-UNIT-01"});
+        e.push_back({pre + "vcaGainDb", &unitVcaGainDb[v], "A-UNIT-01"});
+    }
     add("out.dcHz", outputDcHz, "A-OUT-02");
     return e;
 }

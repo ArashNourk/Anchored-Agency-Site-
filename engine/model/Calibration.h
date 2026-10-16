@@ -167,6 +167,18 @@ struct CalibrationModel {
     double outputGain = 0.25;             // A-OUT-01
     double outputDcHz = 3.0;              // A-OUT-02
 
+    // ---- Unit voice profile (A-UNIT-01) ---------------------------------
+    // Measured persistent offsets of each physical voice of ONE reference
+    // instrument, fitted by tools/validate from the voice-fingerprint test.
+    // Zero = no unit profile. Applied on top of the Vintage model.
+    static constexpr int kUnitVoices = 10;
+    double unitTuneCentsA[kUnitVoices]{};
+    double unitTuneCentsB[kUnitVoices]{};
+    double unitCutoffSemis[kUnitVoices]{};
+    double unitFilterEnvTimeLn[kUnitVoices]{};  // ln of time scale
+    double unitAmpEnvTimeLn[kUnitVoices]{};
+    double unitVcaGainDb[kUnitVoices]{};
+
     // Registry used for file I/O and the fitting tools.
     struct Entry {
         std::string key;

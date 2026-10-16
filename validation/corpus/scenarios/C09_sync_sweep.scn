@@ -1,0 +1,17 @@
+# Sync sweep (Poly Mod filter env -> Freq A, sync on): spectral-centroid
+# trajectory. Validation only (not fitted directly).
+oversample 2
+set A.unison 1
+set A.unison_voices 1
+set A.osca_sync 1
+set A.pm_filter_env 0.7
+set A.pm_freq_a 1
+set A.fenv_attack 0
+set A.fenv_decay 0.6
+set A.fenv_sustain 0
+set A.flt_cutoff 1
+set A.aenv_attack 0
+set A.aenv_sustain 1
+at 0 on 48 100
+at 2.5 off 48
+length 2.8

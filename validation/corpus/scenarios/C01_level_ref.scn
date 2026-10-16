@@ -1,0 +1,12 @@
+# Level reference: one saw voice, filter open. Sets the session gain between
+# the hardware capture chain and the emulator (all dB features use it).
+oversample 2
+set A.unison 1
+set A.unison_voices 1
+set A.flt_cutoff 1
+set A.flt_kbd 0
+set A.aenv_attack 0
+set A.aenv_sustain 1
+at 0 on 60 100
+at 1.0 off 60
+length 1.5

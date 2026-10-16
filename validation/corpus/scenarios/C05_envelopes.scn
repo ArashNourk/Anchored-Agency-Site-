@@ -1,0 +1,33 @@
+# Amp envelope: attack at three knob positions, decay at two, release at two.
+oversample 2
+set A.unison 1
+set A.unison_voices 1
+set A.flt_cutoff 1
+set A.aenv_sustain 0.5
+set A.aenv_decay 0.5
+set A.aenv_release 0.2
+set A.aenv_attack 0.35
+at 0 on 60 100
+at 2.5 off 60
+at 3 set A.aenv_attack 0.55
+at 3 on 60 100
+at 5.5 off 60
+at 6 set A.aenv_attack 0.75
+at 6 on 60 100
+at 8.5 off 60
+at 9 set A.aenv_attack 0
+at 9 set A.aenv_sustain 0
+at 9 set A.aenv_decay 0.35
+at 9 on 60 100
+at 11.4 off 60
+at 11.5 set A.aenv_decay 0.55
+at 11.5 on 60 100
+at 13.9 off 60
+at 14 set A.aenv_sustain 1
+at 14 set A.aenv_release 0.35
+at 14 on 60 100
+at 14.6 off 60
+at 17 set A.aenv_release 0.55
+at 17 on 60 100
+at 17.6 off 60
+length 20

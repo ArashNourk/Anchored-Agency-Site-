@@ -8,7 +8,7 @@ against reference hardware yet**, because none was available.
 |---|---|
 | 1. Single voice: Osc A, Osc B, mixer, noise, both filter models, envelopes, VCA | Done |
 | 2. Audio-rate Poly Mod | Done (per voice, per oversampled sample, Filter Env and Osc B → Freq A / PW A / Filter) |
-| 3. Validate the single voice against hardware | **Not done.** Procedure, scenarios and analysis tools are ready (VALIDATION.md) |
+| 3. Validate the single voice against hardware | **Framework done, hardware measurements not yet made.** `tools/validate` captures, aligns, extracts, fits and reports (VALIDATION_FRAMEWORK.md); its synthetic-hardware self-test exercises the full chain |
 | 4. Ten persistent voices, voice allocation | Done (rotation, same-key reuse, oldest-note stealing, all calibratable) |
 | 5. Vintage / component variation | Done (persistent personalities, drift, tuning/calibration model) |
 | 6. LFO, wheel mod, glide, unison, velocity, aftertouch | Done |

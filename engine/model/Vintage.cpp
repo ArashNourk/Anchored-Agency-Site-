@@ -146,6 +146,13 @@ VoiceAnalogState VintageEngine::state(int voice, double vintageKnob) const {
     s.driftCentsB = k.driftB.value() * c.vDriftCents.at(v) + g;
     s.filterDriftSemis = k.driftF.value() * c.vFilterDriftSemis.at(v) + 0.01 * g;
     s.jitterCents = c.vJitterCents.at(v);
+    // Measured unit profile (zero unless a fitted calibration supplies one).
+    s.tuneCentsA += c.unitTuneCentsA[voice];
+    s.tuneCentsB += c.unitTuneCentsB[voice];
+    s.cutoffOffsetSemis += c.unitCutoffSemis[voice];
+    s.filterEnvTimeScale *= std::exp(c.unitFilterEnvTimeLn[voice]);
+    s.ampEnvTimeScale *= std::exp(c.unitAmpEnvTimeLn[voice]);
+    s.vcaGain *= std::pow(10.0, c.unitVcaGainDb[voice] / 20.0);
     return s;
 }
 

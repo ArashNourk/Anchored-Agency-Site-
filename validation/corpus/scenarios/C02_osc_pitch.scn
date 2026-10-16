@@ -1,0 +1,25 @@
+# Osc A sawtooth pitch and spectrum across the range, one voice (unison 1 =
+# voice 1, assumption A-VAL-06). Osc A Frequency +12 st, so keys 36..96 sound
+# C3..C8 and reach the 3340's high-frequency tracking region.
+oversample 2
+set A.unison 1
+set A.unison_voices 1
+set A.osca_freq 0.75
+set A.flt_cutoff 1
+set A.flt_kbd 0
+set A.aenv_attack 0
+set A.aenv_sustain 1
+set A.aenv_release 0.1
+at 0 on 36 100
+at 0.9 off 36
+at 1 on 48 100
+at 1.9 off 48
+at 2 on 60 100
+at 2.9 off 60
+at 3 on 72 100
+at 3.9 off 72
+at 4 on 84 100
+at 4.9 off 84
+at 5 on 96 100
+at 5.9 off 96
+length 6.2

@@ -1,0 +1,25 @@
+# Self-oscillation frequency/level vs cutoff knob, Rev1/2 then Rev3 filter.
+oversample 2
+set A.unison 1
+set A.unison_voices 1
+set A.mix_osca 0
+set A.flt_resonance 1
+set A.flt_kbd 0
+set A.aenv_attack 0
+set A.aenv_sustain 1
+set A.flt_cutoff 0.3
+at 0 on 60 100
+at 0.7 set A.flt_cutoff 0.4
+at 1.4 set A.flt_cutoff 0.5
+at 2.1 set A.flt_cutoff 0.6
+at 2.8 set A.flt_cutoff 0.7
+at 3.5 set A.flt_cutoff 0.8
+at 4.2 set A.flt_rev 1
+at 4.2 set A.flt_cutoff 0.3
+at 4.9 set A.flt_cutoff 0.4
+at 5.6 set A.flt_cutoff 0.5
+at 6.3 set A.flt_cutoff 0.6
+at 7.0 set A.flt_cutoff 0.7
+at 7.7 set A.flt_cutoff 0.8
+at 8.4 off 60
+length 8.6

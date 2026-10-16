@@ -1,0 +1,19 @@
+# Poly Mod depth: Osc B (Lo Freq, triangle, keyboard off) -> Freq A at three
+# amounts. Measured as peak-to-peak pitch deviation of Osc A.
+oversample 2
+set A.unison 1
+set A.unison_voices 1
+set A.oscb_saw 0
+set A.oscb_tri 1
+set A.oscb_lofreq 1
+set A.oscb_kbd 0
+set A.pm_freq_a 1
+set A.flt_cutoff 1
+set A.aenv_attack 0
+set A.aenv_sustain 1
+set A.pm_osc_b 0.2
+at 0 on 60 100
+at 2.5 set A.pm_osc_b 0.35
+at 5 set A.pm_osc_b 0.5
+at 7.5 off 60
+length 7.6

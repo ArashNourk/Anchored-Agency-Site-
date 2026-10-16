@@ -1,5 +1,10 @@
 # Reference validation against a Prophet-10 Rev4
 
+> The automated pipeline (capture, alignment, feature extraction, calibration
+> fitting, residual reports) is described in
+> [VALIDATION_FRAMEWORK.md](VALIDATION_FRAMEWORK.md). This document is the
+> broader listening and comparison procedure around it.
+
 Accuracy is judged by measurement against a real Prophet-10 Rev4, not by
 whether the result "sounds analog". This document is the procedure. It has
 **not yet been carried out**: no hardware recordings exist in this repository,

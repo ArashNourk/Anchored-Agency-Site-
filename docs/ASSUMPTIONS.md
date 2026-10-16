@@ -131,7 +131,14 @@ gets zero sigmas.
 | A-VAL-01 | Free voices are assigned by rotation | Scenario 09/10 on hardware with Vintage at maximum: each voice has a recognisable pitch/brightness signature (`noteseq`), so the sequence of signatures reveals the assignment order |
 | A-VAL-02 | A key returns to the voice that last played it | Scenario 10: the same key struck repeatedly; one signature means reuse, rotating signatures mean no reuse |
 | A-VAL-03 | Stealing takes the oldest note | Scenario 12: which held note disappears when the 11th and 12th notes arrive |
+| A-VAL-06 | One-voice unison always uses the same physical voice (voice 1) | Corpus C08 anchor: the anchor note's pitch/level/decay signature must match one fingerprint voice consistently across sessions |
 | A-VAL-04/05 | Stack and split use fixed 5 + 5 voice halves | Hold 6+ notes in one half of a split; if the 6th note sounds without stealing, the pool is dynamic |
+
+## Unit profile
+
+| ID | Assumption | How to measure |
+|---|---|---|
+| A-UNIT-01 | A reference unit's persistent per-voice deviations can be represented as per-voice tuning, VCA gain and envelope-time offsets on top of the Vintage model | Fitted from corpus test C08 (`python3 -m tools.validate fit`); the residuals of C08 across sessions show whether the representation is sufficient |
 
 ## Mapping and output
 
