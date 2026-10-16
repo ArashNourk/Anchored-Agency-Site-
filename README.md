@@ -21,6 +21,26 @@ Rev4.** Every constant that public documentation does not establish is
 isolated, documented and calibratable, so the remaining work is measurement,
 not re-engineering. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
+## Play it
+
+The synth runs in a browser: the C++ engine is compiled to WebAssembly and
+runs on the audio thread (AudioWorklet), with the full panel, a 61-key
+on-screen keyboard, computer-keyboard playing, mod/bend wheels, split/stack,
+starter programs, 40 user slots, program text import/export and Web MIDI
+input with MIDI learn.
+
+* Prebuilt: serve `web/dist/` and open it, e.g.
+  `python3 -m http.server -d web/dist 8000`, then visit
+  http://localhost:8000 in Chrome, Edge, Firefox or Safari. (Opening the file
+  directly from disk also works in most browsers; Web MIDI needs `localhost`
+  or https.)
+* Press **Power on**, then play with the on-screen keys, `Z`–`M` / `Q`–`U`,
+  or a MIDI keyboard.
+* Rebuild after engine changes: activate emsdk, then `web/build.sh`.
+
+*Live 2×* oversampling is the default for low CPU; *High 4×* gives the
+cleanest sound on a fast machine.
+
 ## Layout
 
 ```
@@ -31,6 +51,7 @@ engine/          C++17 DSP engine (no UI / audio-API / plugin dependencies)
   midi/ preset/  MIDI performance layer, program storage
   io/ ui/        WAV I/O and host interface; control-surface description
 apps/p10render   offline scenario renderer
+web/             browser app: wasm C API, UI, build script, prebuilt dist/
 tests/           engine self-validation tests
 validation/      scenario scripts for hardware/software comparison
 tools/analysis/  measurement, comparison and calibration-fitting tools (numpy)

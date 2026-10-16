@@ -13,6 +13,9 @@
 
 namespace p10 {
 
+// Locale-independent-enough, exception-free number parsing (whole string).
+bool parseNumber(const std::string& text, double& out);
+
 // Standard deviations of a component tolerance at the four Vintage anchor
 // positions (knob 0.0 = Rev4-calibrated ... knob 1.0 = Rev1-like).
 struct VintageSigma {

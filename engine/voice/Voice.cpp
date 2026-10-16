@@ -126,8 +126,9 @@ void Voice::render(const LayerFrame* frames, int n, const double* noise, double*
 
         // ---- Control-rate section (output sample rate) --------------------
         pitch_ += (pitchTarget_ - pitch_) * d.glideCoef;
-        jitA_ += (rng_.gauss() - jitA_) * jitCoef_;
-        jitB_ += (rng_.gauss() - jitB_) * jitCoef_;
+        // Unit-variance uniform noise; after the low-pass it is Gaussian-like.
+        jitA_ += (rng_.bipolar() * 1.7320508075688772 - jitA_) * jitCoef_;
+        jitB_ += (rng_.bipolar() * 1.7320508075688772 - jitB_) * jitCoef_;
 
         const EnvTimes ft{d.fAtk * feScale, d.fDec * feScale, clamp(d.fSus + an_.sustainOffset, 0.0, 1.0),
                           d.fRel * feScale};

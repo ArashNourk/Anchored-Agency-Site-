@@ -1,5 +1,7 @@
 #include "PresetStore.h"
 
+#include "../model/Calibration.h"
+
 #include <fstream>
 #include <sstream>
 
@@ -44,9 +46,7 @@ std::optional<Program> programFromText(const std::string& text, std::vector<std:
             continue;
         }
         double v;
-        try {
-            v = std::stod(val);
-        } catch (...) {
+        if (!parseNumber(val, v)) {
             if (warnings) warnings->push_back("bad value: " + line);
             continue;
         }

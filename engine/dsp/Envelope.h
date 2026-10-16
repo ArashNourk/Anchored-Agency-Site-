@@ -24,7 +24,10 @@ public:
 
     void setSampleRate(double fs) { fs_ = fs; }
     void setShape(double attackTarget, double decayTauDivisor) {
-        attackTarget_ = attackTarget;
+        if (attackTarget != attackTarget_) {
+            attackTarget_ = attackTarget;
+            attackTauPerSec_ = 1.0 / std::log(attackTarget / (attackTarget - 1.0));
+        }
         tauDiv_ = decayTauDivisor;
     }
 
@@ -45,8 +48,7 @@ public:
             case Stage::Attack: {
                 // Time from 0 to trip level equals attackSec.
                 const double tgt = attackTarget_;
-                const double tau = t.attackSec / std::log(tgt / (tgt - 1.0));
-                v_ += (tgt - v_) * coef(tau);
+                v_ += (tgt - v_) * attackCache_.get(t.attackSec * attackTauPerSec_, fs_);
                 if (v_ >= 1.0) {
                     v_ = 1.0;
                     stage_ = Stage::Decay;
@@ -54,10 +56,10 @@ public:
                 return v_;
             }
             case Stage::Decay:
-                v_ += (t.sustain - v_) * coef(t.decaySec / tauDiv_);
+                v_ += (t.sustain - v_) * decayCache_.get(t.decaySec / tauDiv_, fs_);
                 return v_;
             case Stage::Release:
-                v_ += (0.0 - v_) * coef(t.releaseSec / tauDiv_);
+                v_ += (0.0 - v_) * releaseCache_.get(t.releaseSec / tauDiv_, fs_);
                 if (v_ < 1e-7) {
                     v_ = 0.0;
                     stage_ = Stage::Idle;
@@ -72,12 +74,23 @@ public:
     bool active() const { return stage_ != Stage::Idle; }
 
 private:
-    double coef(double tau) const {
-        if (tau <= 1e-9) return 1.0;
-        return 1.0 - std::exp(-1.0 / (tau * fs_));
-    }
+    // One-pole coefficient for a time constant; times only change when a knob
+    // moves, so the exp() is cached.
+    struct CoefCache {
+        double tau = -1.0, fs = 0.0, coef = 1.0;
+        double get(double t, double sampleRate) {
+            if (t != tau || sampleRate != fs) {
+                tau = t;
+                fs = sampleRate;
+                coef = t <= 1e-9 ? 1.0 : 1.0 - std::exp(-1.0 / (t * sampleRate));
+            }
+            return coef;
+        }
+    };
+    CoefCache attackCache_, decayCache_, releaseCache_;
     double fs_ = 48000.0;
     double attackTarget_ = 1.3;
+    double attackTauPerSec_ = 1.0 / std::log(1.3 / 0.3);
     double tauDiv_ = 4.6;
     double v_ = 0.0;
     Stage stage_ = Stage::Idle;

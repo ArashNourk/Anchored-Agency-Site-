@@ -1,0 +1,870 @@
+<title>P10 Polysynth</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Michroma&display=swap">
+<style>
+/* Layout: one instrument panel. Header strip (power, programs, layers) ->
+   synthesis sections left to right in signal-flow order, wrapping on narrow
+   screens -> performance strip (wheels, keyboard, voice LEDs, scope). */
+:root {
+  --bg: #c4cbd1;          /* page around the instrument */
+  --panel: #dfe3e6;       /* brushed aluminium face */
+  --well: #d2d8dd;        /* recessed section field */
+  --ink: #1b2228;         /* screen-printed legends */
+  --ink-soft: #56626c;
+  --rule: #a3adb6;
+  --cap: #23292f;         /* knob caps */
+  --cap-hi: #434c55;
+  --pointer: #f4f6f7;
+  --led: #f29a14;         /* layer A / active */
+  --led-b: #17a2b4;       /* layer B */
+  --led-off: #b7bec4;
+  --key-w: #f7f8f9;
+  --key-w-down: #ffd9a0;
+  --key-b: #1a1f24;
+  --key-b-down: #b86a00;
+  --warn: #b3261e;
+  --display-bg: #11171c;
+  --display-fg: #ffb547;
+  --font-display: "Michroma", "Eurostile", "Arial Narrow", sans-serif;
+  --font-label: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101418; --panel: #232a31; --well: #1b2127; --ink: #dce2e7; --ink-soft: #8b97a2;
+    --rule: #3b454e; --cap: #0e1215; --cap-hi: #303941; --pointer: #f0f3f5;
+    --led: #ffad2e; --led-b: #3cc6d7; --led-off: #3a434b;
+    --key-w: #dfe3e6; --key-w-down: #ffc46b; --key-b: #0b0e11; --key-b-down: #c77800;
+    --warn: #ff6b5e; --display-bg: #0a0d10; --display-fg: #ffb547; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101418; --panel: #232a31; --well: #1b2127; --ink: #dce2e7; --ink-soft: #8b97a2;
+  --rule: #3b454e; --cap: #0e1215; --cap-hi: #303941; --pointer: #f0f3f5;
+  --led: #ffad2e; --led-b: #3cc6d7; --led-off: #3a434b;
+  --key-w: #dfe3e6; --key-w-down: #ffc46b; --key-b: #0b0e11; --key-b-down: #c77800;
+  --warn: #ff6b5e; --display-bg: #0a0d10; --display-fg: #ffb547; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-label);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px;
+  -webkit-user-select: none; user-select: none;
+}
+.instrument {
+  max-width: 1480px; margin: 0 auto; background: var(--panel);
+  border: 1px solid var(--rule); border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.25) inset, 0 10px 30px rgba(0,0,0,.18);
+  display: flex; flex-direction: column;
+}
+button, select, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--led); outline-offset: 2px; }
+
+/* ---- header strip ---- */
+.strip { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+.wordmark { font-family: var(--font-display); font-size: 22px; letter-spacing: .08em; line-height: 1; display: flex; align-items: baseline; gap: 10px; }
+.wordmark small { font-family: var(--font-label); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+.power { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 4px; border: 1px solid var(--rule); background: var(--well); cursor: pointer; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; }
+.power .lamp { width: 10px; height: 10px; border-radius: 50%; background: var(--led-off); }
+.power[aria-pressed="true"] .lamp { background: var(--led); box-shadow: 0 0 8px var(--led); }
+.display { background: var(--display-bg); color: var(--display-fg); font-family: var(--font-data); border-radius: 3px; padding: 6px 10px; min-width: 0; display: flex; gap: 10px; align-items: center; font-size: 13px; }
+.display select, .display input { background: transparent; border: 0; color: var(--display-fg); font-family: var(--font-data); font-size: 13px; min-width: 0; }
+.display select option, .display select optgroup { background: var(--display-bg); color: var(--display-fg); }
+.display input { width: 16ch; border-bottom: 1px dashed rgba(255,181,71,.4); }
+.grow { flex: 1 1 auto; }
+.group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.group > .cap { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); margin-right: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.seg button { border: 0; background: var(--well); padding: 5px 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 12.5px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--cap); color: var(--display-fg); }
+.btn { border: 1px solid var(--rule); background: var(--well); border-radius: 4px; padding: 5px 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 12.5px; cursor: pointer; }
+.btn:hover, .seg button:hover { filter: brightness(1.05); }
+.btn[aria-pressed="true"] { background: var(--cap); color: var(--display-fg); }
+.status { font-family: var(--font-data); font-size: 11.5px; color: var(--ink-soft); }
+.status.warn { color: var(--warn); }
+
+/* ---- synthesis sections ---- */
+.panel { display: flex; flex-wrap: wrap; gap: 1px; background: var(--rule); border-bottom: 1px solid var(--rule); }
+.section { background: var(--panel); padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1 1 200px; }
+.section h2 { margin: 0; font-size: 12.5px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.section h2::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 8px; align-items: flex-start; }
+.sub { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); width: 100%; margin-top: 2px; }
+
+.knob { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 58px; touch-action: none; cursor: ns-resize; }
+.knob svg { width: 46px; height: 46px; display: block; }
+.knob .lbl { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-align: center; line-height: 1.05; }
+.knob .val { font-family: var(--font-data); font-size: 10.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; min-height: 1.2em; }
+.knob.learn-armed svg circle.cap { stroke: var(--warn); stroke-width: 3; }
+.knob .scale { fill: none; stroke: var(--ink-soft); stroke-width: 1; }
+.knob .arc { fill: none; stroke: var(--led); stroke-width: 2.5; stroke-linecap: round; }
+.knob .cap { fill: var(--cap); stroke: var(--cap-hi); stroke-width: 1.5; }
+.knob .ptr { stroke: var(--pointer); stroke-width: 2.5; stroke-linecap: round; }
+.layer-b .knob .arc { stroke: var(--led-b); }
+
+.sw { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 44px; background: none; border: 0; padding: 0; cursor: pointer; }
+.sw .key { width: 30px; height: 18px; border-radius: 3px; background: var(--cap); border: 1px solid var(--cap-hi); display: grid; place-items: center; }
+.sw .led { width: 7px; height: 7px; border-radius: 50%; background: var(--led-off); }
+.sw[aria-pressed="true"] .led, .sw[data-on="true"] .led { background: var(--led); box-shadow: 0 0 6px var(--led); }
+.layer-b .sw[aria-pressed="true"] .led, .layer-b .sw[data-on="true"] .led { background: var(--led-b); box-shadow: 0 0 6px var(--led-b); }
+.sw .lbl { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-align: center; line-height: 1.05; }
+.sw .val { font-family: var(--font-data); font-size: 10.5px; color: var(--ink-soft); }
+
+/* ---- performance strip ---- */
+.perf { display: grid; grid-template-columns: auto 1fr; gap: 12px 16px; padding: 14px 16px 16px; align-items: stretch; }
+.wheels { display: flex; gap: 10px; align-items: stretch; }
+.wheel { width: 34px; height: 150px; border-radius: 6px; background: var(--cap); border: 1px solid var(--cap-hi); position: relative; touch-action: none; cursor: ns-resize; }
+.wheel .thumb { position: absolute; left: 3px; right: 3px; height: 18px; border-radius: 4px; background: linear-gradient(var(--cap-hi), var(--cap)); border: 1px solid var(--ink-soft); }
+.wheel-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+.kbd-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.kbd-tools { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.voices { display: flex; gap: 5px; align-items: center; }
+.voices .v { width: 12px; height: 12px; border-radius: 2px; background: var(--led-off); transition: opacity .05s; }
+.scope { width: 160px; height: 34px; background: var(--display-bg); border-radius: 3px; display: block; }
+.kbd-scroll { overflow-x: auto; border-radius: 4px; border: 1px solid var(--rule); background: var(--cap); }
+.keyboard { position: relative; height: 150px; touch-action: none; }
+.keyboard .w, .keyboard .b { position: absolute; top: 0; border-radius: 0 0 4px 4px; }
+.keyboard .w { background: var(--key-w); border: 1px solid var(--rule); height: 100%; z-index: 1; }
+.keyboard .b { background: var(--key-b); height: 62%; z-index: 2; border: 1px solid #000; }
+.keyboard .w.down { background: var(--key-w-down); }
+.keyboard .b.down { background: var(--key-b-down); }
+.keyboard .w .c { position: absolute; bottom: 5px; left: 0; right: 0; text-align: center; font-family: var(--font-data); font-size: 9.5px; color: #5c6670; }
+.keyboard .split { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--led-b); z-index: 3; pointer-events: none; }
+
+details.tray { border-top: 1px solid var(--rule); padding: 10px 16px 14px; }
+details.tray summary { cursor: pointer; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; }
+.tray-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 10px; }
+.tray-body textarea { width: 100%; min-height: 160px; font-family: var(--font-data); font-size: 12px; background: var(--well); border: 1px solid var(--rule); border-radius: 4px; padding: 8px; resize: vertical; -webkit-user-select: text; user-select: text; }
+.tray-body p, .help { font-family: var(--font-data); font-size: 12px; line-height: 1.55; color: var(--ink-soft); margin: 0; max-width: 70ch; }
+.help kbd { font-family: var(--font-data); border: 1px solid var(--rule); border-radius: 3px; padding: 0 4px; background: var(--well); color: var(--ink); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--display-bg); color: var(--display-fg); font-family: var(--font-data); font-size: 12.5px; padding: 8px 14px; border-radius: 4px; z-index: 20; }
+
+@media (max-width: 720px) {
+  .perf { grid-template-columns: 1fr; }
+  .wheels { justify-content: flex-start; }
+  .wheel { height: 110px; }
+  .tray-body { grid-template-columns: 1fr; }
+  .scope { width: 120px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="instrument" id="instrument">
+  <header class="strip">
+    <div class="wordmark">P10 <small>10-voice analog model</small></div>
+    <button class="power" id="power" aria-pressed="false"><span class="lamp"></span><span id="power-label">Power on</span></button>
+    <div class="display grow">
+      <select id="program-select" aria-label="Program"></select>
+      <input id="program-name" aria-label="Program name" maxlength="24" value="Basic Program">
+    </div>
+    <div class="group">
+      <span class="cap">Store</span>
+      <select id="store-slot" class="btn" aria-label="User slot"></select>
+      <button class="btn" id="store-btn">Save</button>
+      <button class="btn" id="init-btn" title="Load the basic program">Init</button>
+    </div>
+  </header>
+
+  <div class="strip">
+    <div class="group"><span class="cap">Mode</span>
+      <div class="seg" id="mode-seg">
+        <button data-mode="0" aria-pressed="true">Single</button><button data-mode="1">Split</button><button data-mode="2">Stack</button>
+      </div>
+    </div>
+    <div class="group"><span class="cap">Edit layer</span>
+      <div class="seg" id="layer-seg"><button data-layer="0" aria-pressed="true">A</button><button data-layer="1">B</button></div>
+    </div>
+    <div class="group"><span class="cap">Split</span>
+      <button class="btn" id="split-btn" aria-pressed="false">Set point</button>
+      <span class="status" id="split-readout">C4 (60)</span>
+    </div>
+    <div class="group"><span class="cap">Balance</span><div id="balance-slot"></div></div>
+    <div class="group"><span class="cap">Quality</span>
+      <div class="seg" id="quality-seg"><button data-os="2" aria-pressed="true">Live 2&times;</button><button data-os="4">High 4&times;</button></div>
+    </div>
+    <div class="group">
+      <button class="btn" id="tune-btn" title="Run the tuning routine on all ten voices">Tune</button>
+      <button class="btn" id="panic-btn" title="Stop all sound">Panic</button>
+      <button class="btn" id="learn-btn" aria-pressed="false" title="Click a knob, then move a controller">MIDI learn</button>
+    </div>
+    <div class="group"><span class="cap">MIDI in</span><select class="btn" id="midi-select" aria-label="MIDI input"><option value="">None</option></select></div>
+    <span class="status" id="status">Audio off. Press Power on to play.</span>
+  </div>
+
+  <main class="panel" id="panel"></main>
+
+  <section class="perf">
+    <div class="wheels">
+      <div class="wheel-wrap"><div class="wheel" id="bend-wheel" role="slider" aria-label="Pitch bend" tabindex="0"><div class="thumb"></div></div>Bend</div>
+      <div class="wheel-wrap"><div class="wheel" id="mod-wheel" role="slider" aria-label="Mod wheel" tabindex="0"><div class="thumb"></div></div>Mod</div>
+    </div>
+    <div class="kbd-col">
+      <div class="kbd-tools">
+        <div class="group"><span class="cap">Octave</span>
+          <button class="btn" id="oct-down" aria-label="Octave down">&minus;</button>
+          <span class="status" id="oct-readout">C3</span>
+          <button class="btn" id="oct-up" aria-label="Octave up">+</button>
+        </div>
+        <div class="group"><span class="cap">Key velocity</span>
+          <input type="range" id="vel" min="1" max="127" value="100" aria-label="Velocity for computer keys">
+          <span class="status" id="vel-readout">100</span>
+        </div>
+        <div class="group"><span class="cap">Hold</span><button class="btn" id="hold-btn" aria-pressed="false">Sustain</button></div>
+        <div class="group"><span class="cap">Voices</span><div class="voices" id="voices"></div></div>
+        <canvas class="scope" id="scope" width="320" height="68" aria-label="Output scope"></canvas>
+      </div>
+      <div class="kbd-scroll" id="kbd-scroll"><div class="keyboard" id="keyboard"></div></div>
+      <p class="help">Computer keys: <kbd>Z</kbd>–<kbd>M</kbd> and <kbd>Q</kbd>–<kbd>U</kbd> play two octaves (sharps on the row above), <kbd>&larr;</kbd>/<kbd>&rarr;</kbd> change octave, <kbd>Space</kbd> holds. On-screen keys play louder near the front edge. Knobs: drag up/down, <kbd>Shift</kbd> for fine, double-click for default, arrow keys when focused.</p>
+    </div>
+  </section>
+
+  <details class="tray" id="tray">
+    <summary>Program text, import and export</summary>
+    <div class="tray-body">
+      <div>
+        <textarea id="prog-text" spellcheck="false" aria-label="Program text"></textarea>
+        <div class="row">
+          <button class="btn" id="copy-btn">Copy</button>
+          <button class="btn" id="apply-btn">Load this text</button>
+          <label class="btn" for="file-in">Import file</label>
+          <input type="file" id="file-in" accept=".p10,.txt,text/plain" hidden>
+        </div>
+      </div>
+      <p>This text is the complete program: every knob and switch of both layers plus the split/stack settings. Copy it to keep a program, or paste one and choose <em>Load this text</em>. User slots are saved in this browser only. The model's analog constants are uncalibrated estimates and have not been checked against a hardware Prophet-10 yet.</p>
+    </div>
+  </details>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+const WASM_B64 = "__P10_WASM_BASE64__";
+
+// ---------------------------------------------------------------- engine core
+// Shared by the AudioWorklet (serialised with toString) and the
+// ScriptProcessor fallback on the main thread.
+function P10Core() {
+  const stub = () => 0;
+  const imports = { env: { emscripten_notify_memory_growth: stub },
+    wasi_snapshot_preview1: { fd_seek: stub, fd_write: stub, fd_close: stub, environ_sizes_get: stub, environ_get: stub } };
+  class Core {
+    constructor(bytes, rate, os, serial) {
+      this.rate = rate; this.os = os; this.serial = serial; this.ready = false; this.queue = [];
+      this.promise = WebAssembly.instantiate(bytes, imports).then(r => {
+        this.e = r.instance.exports; this.e._initialize();
+        this.e.p10_create(rate, os, serial); this.ready = true;
+        const q = this.queue; this.queue = []; for (const m of q) this.apply(m);
+      });
+    }
+    post(m) { if (this.ready) this.apply(m); else this.queue.push(m); }
+    apply(m) {
+      const e = this.e;
+      switch (m.t) {
+        case "p": e.p10_set_layer_param(m.l, m.id, m.v); break;
+        case "pp": e.p10_set_program_param(m.id, m.v); break;
+        case "on": e.p10_note_on(m.n, m.v); break;
+        case "off": e.p10_note_off(m.n); break;
+        case "wheel": e.p10_mod_wheel(m.v); break;
+        case "bend": e.p10_pitch_bend(m.v); break;
+        case "at": e.p10_pressure(m.v); break;
+        case "sus": e.p10_sustain(m.v ? 1 : 0); break;
+        case "tune": e.p10_tune(); break;
+        case "panic": e.p10_all_sound_off(); break;
+        case "os": this.os = m.v; e.p10_create(this.rate, m.v, this.serial); break;
+        case "prog": {
+          const ptr = e.p10_text_buffer(m.bytes.length);
+          new Uint8Array(e.memory.buffer, ptr, m.bytes.length).set(m.bytes);
+          e.p10_load_program_text(); break;
+        }
+      }
+    }
+    render(l, r) {
+      if (!this.ready) { l.fill(0); if (r) r.fill(0); return false; }
+      const n = l.length; let done = 0;
+      while (done < n) {
+        const k = Math.min(1024, n - done);
+        this.e.p10_render(k);
+        const mem = new Float32Array(this.e.memory.buffer);
+        const p0 = this.e.p10_out(0) >> 2;
+        l.set(mem.subarray(p0, p0 + k), done);
+        done += k;
+      }
+      if (r) r.set(l);
+      return true;
+    }
+    meters() {
+      const out = new Float32Array(20);
+      for (let v = 0; v < 10; v++) { out[v] = this.e.p10_voice_level(v); out[10 + v] = this.e.p10_voice_layer(v); }
+      return out;
+    }
+  }
+  return Core;
+}
+
+const WORKLET_SRC = `
+const Core = (${P10Core.toString()})();
+class P10Processor extends AudioWorkletProcessor {
+  constructor(opt) {
+    super();
+    const o = opt.processorOptions;
+    this.core = new Core(o.wasm, sampleRate, o.os, o.serial);
+    this.core.promise.then(() => this.port.postMessage({ t: "ready" }));
+    this.port.onmessage = e => this.core.post(e.data);
+    this.tick = 0;
+  }
+  process(inputs, outputs) {
+    const out = outputs[0];
+    this.core.render(out[0], out[1]);
+    if (this.core.ready && ++this.tick % 8 === 0) this.port.postMessage({ t: "m", m: this.core.meters() });
+    return true;
+  }
+}
+registerProcessor("p10-engine", P10Processor);
+`;
+
+// ------------------------------------------------------------- metadata (wasm)
+function b64ToBytes(b64) {
+  const bin = atob(b64); const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+const wasmBytes = b64ToBytes(WASM_B64);
+const enc = new TextEncoder();
+
+const META = { layer: [], program: [] };
+async function loadMeta() {
+  const stub = () => 0;
+  const { instance } = await WebAssembly.instantiate(wasmBytes, { env: { emscripten_notify_memory_growth: stub },
+    wasi_snapshot_preview1: { fd_seek: stub, fd_write: stub, fd_close: stub, environ_sizes_get: stub, environ_get: stub } });
+  const e = instance.exports; e._initialize();
+  const str = p => { const m = new Uint8Array(e.memory.buffer); let q = p; while (m[q]) q++; return new TextDecoder().decode(m.subarray(p, q)); };
+  for (let i = 0; i < e.p10_num_layer_params(); i++)
+    META.layer.push({ id: i, key: str(e.p10_layer_param_key(i)), name: str(e.p10_layer_param_name(i)), kind: e.p10_layer_param_kind(i),
+      min: e.p10_layer_param_min(i), max: e.p10_layer_param_max(i), def: e.p10_layer_param_default(i), cc: e.p10_layer_param_cc(i) });
+  const pdefs = { layer_mode: [0, 2, 0, 2], split_point: [0, 127, 60, 2], split_upper_b: [0, 1, 1, 1], layer_balance: [0, 1, 0.5, 0] };
+  for (let i = 0; i < e.p10_num_program_params(); i++) {
+    const key = str(e.p10_program_param_key(i)); const d = pdefs[key] || [0, 1, 0, 0];
+    META.program.push({ id: i, key, min: d[0], max: d[1], def: d[2], kind: d[3] });
+  }
+}
+const L = k => META.layer.find(p => p.key === k).id;
+const P = k => META.program.find(p => p.key === k).id;
+
+// ------------------------------------------------------------- program model
+function initProgram() {
+  return { name: "Basic Program",
+    layer: [META.layer.map(p => p.def), META.layer.map(p => p.def)],
+    settings: META.program.map(p => p.def) };
+}
+function programToText(pr) {
+  let s = "[program]\nname=" + pr.name + "\n";
+  for (let l = 0; l < 2; l++) META.layer.forEach(p => { s += (l ? "B." : "A.") + p.key + "=" + +pr.layer[l][p.id].toFixed(6) + "\n"; });
+  META.program.forEach(p => { s += "P." + p.key + "=" + +pr.settings[p.id].toFixed(6) + "\n"; });
+  return s + "[end]\n";
+}
+function programFromText(text) {
+  const pr = initProgram(); let any = false;
+  for (let line of text.split(/\r?\n/)) {
+    line = line.trim();
+    if (!line || line[0] === "#" || line === "[program]") continue;
+    if (line === "[end]") break;
+    const eq = line.indexOf("="); if (eq < 0) continue;
+    const key = line.slice(0, eq).trim(), val = line.slice(eq + 1).trim(); any = true;
+    if (key === "name") { pr.name = val.slice(0, 24); continue; }
+    const v = Number(val); if (!Number.isFinite(v)) continue;
+    const m = /^([ABP])\.(.+)$/.exec(key); if (!m) continue;
+    if (m[1] === "P") { const d = META.program.find(p => p.key === m[2]); if (d) pr.settings[d.id] = Math.min(d.max, Math.max(d.min, v)); }
+    else { const d = META.layer.find(p => p.key === m[2]); if (d) pr.layer[m[1] === "A" ? 0 : 1][d.id] = Math.min(d.max, Math.max(d.min, v)); }
+  }
+  return any ? pr : null;
+}
+
+// Starter programs: written for this instrument, not copies of any factory set.
+function starters() {
+  const mk = (name, a, b, settings) => {
+    const pr = initProgram(); pr.name = name;
+    const set = (l, o) => { for (const k in o) pr.layer[l][L(k)] = o[k]; };
+    set(0, a || {}); set(1, b || a || {});
+    for (const k in settings || {}) pr.settings[P(k)] = settings[k];
+    return pr;
+  };
+  const syncLead = { osca_sync: 1, osca_freq: 0.75, pm_filter_env: 0.62, pm_freq_a: 1, fenv_attack: 0, fenv_decay: 0.55, fenv_sustain: 0.15,
+    oscb_saw: 1, mix_osca: 0.9, mix_oscb: 0.2, flt_cutoff: 0.74, flt_resonance: 0.18, flt_env_amt: 0.22, aenv_sustain: 0.9, aenv_release: 0.3,
+    glide: 0.22, unison: 1, unison_voices: 4, unison_detune: 0.12, lfo_freq: 0.55 };
+  const bell = { osca_saw: 0, osca_pulse: 1, osca_pw: 0.5, oscb_saw: 0, oscb_tri: 1, oscb_freq: 0.5 + 19 / 48, pm_osc_b: 0.36, pm_freq_a: 1,
+    mix_osca: 0.85, flt_cutoff: 0.6, flt_env_amt: 0.32, fenv_decay: 0.62, fenv_sustain: 0, aenv_decay: 0.72, aenv_sustain: 0, aenv_release: 0.62, aenv_vel: 1 };
+  const strings = { oscb_fine: 0.54, mix_osca: 0.75, mix_oscb: 0.75, flt_cutoff: 0.55, flt_env_amt: 0.14, fenv_attack: 0.45, fenv_decay: 0.6,
+    fenv_sustain: 0.6, aenv_attack: 0.45, aenv_release: 0.56, lfo_tri: 1, lfo_freq: 0.47, lfo_initial_amount: 0.1, vintage: 0.85, at_filter: 1 };
+  const bass = { unison: 1, unison_voices: 6, unison_detune: 0.2, key_priority: 0, oscb_freq: 0.25, oscb_pulse: 1, oscb_saw: 0, oscb_pw: 0.42,
+    mix_osca: 0.85, mix_oscb: 0.8, flt_cutoff: 0.3, flt_resonance: 0.35, flt_env_amt: 0.42, fenv_decay: 0.45, fenv_sustain: 0.1, flt_rev: 1,
+    aenv_decay: 0.5, aenv_sustain: 0.8, aenv_release: 0.2, flt_vel: 1 };
+  return [
+    initProgram(),
+    mk("Sync Lead", syncLead),
+    mk("Glass Bell", bell),
+    mk("Brass Section", { oscb_fine: 0.53, mix_osca: 0.8, mix_oscb: 0.8, flt_cutoff: 0.4, flt_resonance: 0.1, flt_env_amt: 0.45, fenv_attack: 0.35,
+      fenv_decay: 0.55, fenv_sustain: 0.45, fenv_release: 0.4, aenv_attack: 0.2, aenv_sustain: 0.9, aenv_release: 0.35, flt_vel: 1, vintage: 0.3 }),
+    mk("Unison Bass", bass),
+    mk("Vintage Strings", strings),
+    mk("PWM Pad", { osca_saw: 0, osca_pulse: 1, osca_pw: 0.4, oscb_saw: 0, oscb_pulse: 1, oscb_pw: 0.6, oscb_fine: 0.52, mix_osca: 0.75, mix_oscb: 0.75,
+      lfo_tri: 1, lfo_freq: 0.35, lfo_initial_amount: 0.32, wm_freq_a: 0, wm_freq_b: 0, wm_pw_a: 1, wm_pw_b: 1, flt_cutoff: 0.58,
+      flt_env_amt: 0.2, fenv_attack: 0.5, fenv_sustain: 0.5, aenv_attack: 0.5, aenv_release: 0.6, vintage: 0.4 }),
+    mk("Poly Mod Growl", { oscb_freq: 0.5 - 12 / 48, pm_osc_b: 0.42, pm_filter: 1, pm_filter_env: 0.3, pm_freq_a: 1, flt_resonance: 0.68,
+      flt_cutoff: 0.42, flt_env_amt: 0.4, fenv_decay: 0.5, fenv_sustain: 0.2, mix_osca: 0.85 }),
+    mk("Whistling Filter", { mix_osca: 0, flt_resonance: 1, flt_kbd: 2, flt_cutoff: 0.62, glide: 0.2, wm_filter: 1, wm_freq_a: 0, wm_freq_b: 0,
+      lfo_freq: 0.55, aenv_attack: 0.15, aenv_release: 0.4 }),
+    mk("Noise Snap", { mix_osca: 0, mix_noise: 0.9, flt_cutoff: 0.55, flt_resonance: 0.62, flt_env_amt: 0.5, fenv_decay: 0.3, fenv_sustain: 0,
+      aenv_decay: 0.3, aenv_sustain: 0, aenv_release: 0.25, aenv_vel: 1 }),
+    mk("Split: Bass | Lead", Object.assign({}, bass, { unison: 0 }), syncLead, { layer_mode: 1, split_point: 60 }),
+    mk("Stack: Strings + Bell", strings, bell, { layer_mode: 2, layer_balance: 0.42 }),
+  ];
+}
+
+// --------------------------------------------------------------------- state
+const S = {
+  program: null, edit: 0, engine: null, ctx: null, analyser: null, octave: 48, held: new Map(), sustain: false,
+  learn: false, learnTarget: null, ccMap: {}, splitArm: false, os: 2, controls: [], starters: [], user: [],
+};
+const $ = id => document.getElementById(id);
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => (t.hidden = true), 1800); }
+function store(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+function recall(key, dflt) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : dflt; } catch (e) { return dflt; } }
+const NOTE = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+const noteName = n => NOTE[n % 12] + (Math.floor(n / 12) - 1);
+
+function send(m) { if (S.engine) S.engine.post(m); }
+function setLayerParam(layer, id, v, fromUI) {
+  S.program.layer[layer][id] = v;
+  send({ t: "p", l: layer, id, v });
+  if (layer === S.edit) S.controls.forEach(c => c.id === id && c !== fromUI && c.update());
+  saveEditBuffer();
+}
+function setProgramParam(id, v) {
+  S.program.settings[id] = v; send({ t: "pp", id, v }); refreshProgramControls(); saveEditBuffer();
+}
+function sendWholeProgram() { send({ t: "prog", bytes: enc.encode(programToText(S.program)) }); }
+let saveTimer = 0;
+function saveEditBuffer() { clearTimeout(saveTimer); saveTimer = setTimeout(() => { store("p10.edit", programToText(S.program)); $("prog-text").value = programToText(S.program); }, 300); }
+
+// ------------------------------------------------------------------ controls
+const KNOB_ARC = 270;
+function knobReadout(key, v, layer) {
+  const pr = S.program.layer[layer];
+  switch (key) {
+    case "osca_freq": case "oscb_freq": { const s = Math.round((v - 0.5) * 48); return (s > 0 ? "+" : "") + s + " st"; }
+    case "oscb_fine": { const c = Math.round((v - 0.5) * 200); return (c > 0 ? "+" : "") + c + " ct"; }
+    case "osca_pw": case "oscb_pw": return Math.round(v * 100) + "%";
+    case "wm_source_mix": return v < 0.02 ? "LFO" : v > 0.98 ? "Noise" : Math.round((1 - v) * 100) + "/" + Math.round(v * 100);
+    case "vintage": return "Rev " + (4 - v * 3).toFixed(1);
+    default: return (v * 10).toFixed(1);
+  }
+}
+function makeKnob(def) {
+  // def: {key, label, layerParam:bool | program key, get(), set(v), def}
+  const el = document.createElement("div"); el.className = "knob"; el.tabIndex = 0; el.setAttribute("role", "slider");
+  el.setAttribute("aria-label", def.label); el.setAttribute("aria-valuemin", "0"); el.setAttribute("aria-valuemax", "1");
+  const r = 18, cx = 23, cy = 23;
+  const pt = (deg, rad) => { const a = (deg - 90) * Math.PI / 180; return [cx + rad * Math.cos(a), cy + rad * Math.sin(a)]; };
+  const arcPath = (a0, a1, rad) => { const [x0, y0] = pt(a0, rad), [x1, y1] = pt(a1, rad); return `M${x0} ${y0} A${rad} ${rad} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1} ${y1}`; };
+  let ticks = ""; for (let i = 0; i <= 10; i++) { const a = -135 + i * 27; const [x0, y0] = pt(a, 21), [x1, y1] = pt(a, i % 5 ? 22.5 : 23.5); ticks += `M${x0} ${y0}L${x1} ${y1}`; }
+  el.innerHTML = `<svg viewBox="0 0 46 46" aria-hidden="true"><path class="scale" d="${ticks}"/><path class="arc" d=""/><circle class="cap" cx="23" cy="23" r="${r - 2}"/><line class="ptr" x1="23" y1="23" x2="23" y2="9"/></svg><span class="lbl">${def.label}</span><span class="val"></span>`;
+  const arc = el.querySelector(".arc"), ptr = el.querySelector(".ptr"), val = el.querySelector(".val");
+  const ctl = {
+    id: def.id, el,
+    update() {
+      const v = def.get(); const a = -135 + v * KNOB_ARC;
+      arc.setAttribute("d", v > 0.004 ? arcPath(-135, a, 21.8) : "");
+      const [x, y] = pt(a, r - 4); ptr.setAttribute("x2", x); ptr.setAttribute("y2", y);
+      val.textContent = def.readout ? def.readout(v) : (v * 10).toFixed(1);
+      el.setAttribute("aria-valuenow", v.toFixed(3)); el.setAttribute("aria-valuetext", val.textContent);
+    },
+  };
+  const setV = v => { v = Math.min(1, Math.max(0, v)); def.set(v, ctl); ctl.update(); };
+  let startY = 0, startV = 0, dragging = false;
+  el.addEventListener("pointerdown", e => {
+    if (S.learn && def.id !== undefined && def.layerParam) { armLearn(def, el); return; }
+    dragging = true; startY = e.clientY; startV = def.get(); el.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  el.addEventListener("pointermove", e => {
+    if (!dragging) return;
+    const scale = e.shiftKey ? 0.0008 : 0.005;
+    setV(startV + (startY - e.clientY) * scale);
+  });
+  const end = () => { dragging = false; };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+  el.addEventListener("dblclick", () => setV(def.def));
+  el.addEventListener("wheel", e => { e.preventDefault(); setV(def.get() - Math.sign(e.deltaY) * (e.shiftKey ? 0.002 : 0.02)); }, { passive: false });
+  el.addEventListener("keydown", e => {
+    const step = e.shiftKey ? 0.002 : 0.02;
+    if (e.key === "ArrowUp" || e.key === "ArrowRight") { setV(def.get() + step); e.preventDefault(); e.stopPropagation(); }
+    if (e.key === "ArrowDown" || e.key === "ArrowLeft") { setV(def.get() - step); e.preventDefault(); e.stopPropagation(); }
+    if (e.key === "Home") { setV(0); e.preventDefault(); } if (e.key === "End") { setV(1); e.preventDefault(); }
+  });
+  return ctl;
+}
+function makeSwitch(def) {
+  // def: {label, get(), set(v), options?: [labels] for stepped cycling}
+  const el = document.createElement("button"); el.className = "sw"; el.type = "button";
+  el.innerHTML = `<span class="key"><span class="led"></span></span><span class="lbl">${def.label}</span>` + (def.options ? `<span class="val"></span>` : "");
+  const valEl = el.querySelector(".val");
+  const ctl = {
+    id: def.id, el,
+    update() {
+      const v = def.get();
+      if (def.options) { valEl.textContent = def.options[v - (def.min || 0)] ?? String(v); el.dataset.on = String(v > (def.min || 0)); el.setAttribute("aria-label", def.label + ": " + valEl.textContent); }
+      else el.setAttribute("aria-pressed", String(v > 0.5));
+    },
+  };
+  el.addEventListener("click", () => {
+    if (def.options) { const min = def.min || 0, max = min + def.options.length - 1; let v = def.get() + 1; if (v > max) v = min; def.set(v, ctl); }
+    else def.set(def.get() > 0.5 ? 0 : 1, ctl);
+    ctl.update();
+  });
+  return ctl;
+}
+
+const LAYOUT = [
+  ["LFO", [["k", "lfo_freq", "Frequency"], ["k", "lfo_initial_amount", "Initial Amount"], ["s", "lfo_saw", "Saw"], ["s", "lfo_tri", "Tri"], ["s", "lfo_square", "Square"]]],
+  ["Wheel Mod", [["k", "wm_source_mix", "Source Mix"], ["sub", "Destinations"], ["s", "wm_freq_a", "Freq A"], ["s", "wm_freq_b", "Freq B"], ["s", "wm_pw_a", "PW A"], ["s", "wm_pw_b", "PW B"], ["s", "wm_filter", "Filter"],
+    ["sub", "Aftertouch"], ["s", "at_filter", "Filter"], ["s", "at_lfo_amount", "LFO Amt"]]],
+  ["Poly Mod", [["k", "pm_filter_env", "Filter Env"], ["k", "pm_osc_b", "Osc B"], ["sub", "Destinations"], ["s", "pm_freq_a", "Freq A"], ["s", "pm_pw_a", "PW A"], ["s", "pm_filter", "Filter"]]],
+  ["Oscillator A", [["k", "osca_freq", "Frequency"], ["k", "osca_pw", "Pulse Width"], ["s", "osca_saw", "Saw"], ["s", "osca_pulse", "Pulse"], ["s", "osca_sync", "Sync"]]],
+  ["Oscillator B", [["k", "oscb_freq", "Frequency"], ["k", "oscb_fine", "Fine"], ["k", "oscb_pw", "Pulse Width"], ["s", "oscb_saw", "Saw"], ["s", "oscb_tri", "Tri"], ["s", "oscb_pulse", "Pulse"], ["s", "oscb_lofreq", "Lo Freq"], ["s", "oscb_kbd", "Kbd"]]],
+  ["Mixer", [["k", "mix_osca", "Osc A"], ["k", "mix_oscb", "Osc B"], ["k", "mix_noise", "Noise"]]],
+  ["Filter", [["k", "flt_cutoff", "Cutoff"], ["k", "flt_resonance", "Resonance"], ["k", "flt_env_amt", "Env Amount"],
+    ["c", "flt_kbd", "Keyboard", ["Off", "Half", "Full"]], ["c", "flt_rev", "Revision", ["Rev 1/2", "Rev 3"]], ["s", "flt_vel", "Velocity"]]],
+  ["Filter Envelope", [["k", "fenv_attack", "Attack"], ["k", "fenv_decay", "Decay"], ["k", "fenv_sustain", "Sustain"], ["k", "fenv_release", "Release"]]],
+  ["Amplifier Envelope", [["k", "aenv_attack", "Attack"], ["k", "aenv_decay", "Decay"], ["k", "aenv_sustain", "Sustain"], ["k", "aenv_release", "Release"], ["s", "aenv_vel", "Velocity"]]],
+  ["Performance", [["k", "glide", "Glide"], ["k", "unison_detune", "Detune"], ["k", "volume", "Volume"], ["s", "unison", "Unison"],
+    ["c", "unison_voices", "Voices", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], 1], ["c", "key_priority", "Priority", ["Low", "High", "Last"]],
+    ["s", "retrigger", "Retrig"], ["c", "bend_range", "Bend", Array.from({ length: 13 }, (_, i) => i + " st")]]],
+  ["Vintage", [["k", "vintage", "Vintage"]]],
+];
+
+function buildPanel() {
+  const panel = $("panel"); panel.innerHTML = ""; S.controls = [];
+  for (const [title, items] of LAYOUT) {
+    const sec = document.createElement("section"); sec.className = "section";
+    sec.innerHTML = `<h2>${title}</h2>`;
+    const box = document.createElement("div"); box.className = "controls"; sec.appendChild(box);
+    for (const it of items) {
+      if (it[0] === "sub") { const s = document.createElement("div"); s.className = "sub"; s.textContent = it[1]; box.appendChild(s); continue; }
+      const id = L(it[1]); const meta = META.layer[id];
+      const common = { id, label: it[2], layerParam: true, def: meta.def,
+        get: () => S.program.layer[S.edit][id], set: (v, c) => setLayerParam(S.edit, id, v, c) };
+      let ctl;
+      if (it[0] === "k") ctl = makeKnob(Object.assign(common, { readout: v => knobReadout(it[1], v, S.edit) }));
+      else if (it[0] === "s") ctl = makeSwitch(common);
+      else ctl = makeSwitch(Object.assign(common, { options: it[3], min: it[4] || 0 }));
+      box.appendChild(ctl.el); S.controls.push(ctl);
+    }
+    panel.appendChild(sec);
+  }
+  // Program-level balance knob lives in the strip.
+  const bal = makeKnob({ label: "A / B", def: 0.5, get: () => S.program.settings[P("layer_balance")],
+    set: v => setProgramParam(P("layer_balance"), v), readout: v => Math.round((1 - v) * 100) + "/" + Math.round(v * 100) });
+  $("balance-slot").replaceChildren(bal.el); S.balance = bal;
+}
+function refreshAll() {
+  S.controls.forEach(c => c.update()); refreshProgramControls();
+  $("panel").classList.toggle("layer-b", S.edit === 1);
+  $("program-name").value = S.program.name; $("prog-text").value = programToText(S.program);
+}
+function refreshProgramControls() {
+  const mode = Math.round(S.program.settings[P("layer_mode")]);
+  [...$("mode-seg").children].forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.mode === mode)));
+  [...$("layer-seg").children].forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.layer === S.edit)));
+  const sp = Math.round(S.program.settings[P("split_point")]);
+  $("split-readout").textContent = mode === 1 ? noteName(sp) + " (" + sp + ")" : "Off";
+  S.balance && S.balance.update();
+  drawSplitMarker();
+}
+
+// --------------------------------------------------------------- programs
+function buildProgramList() {
+  const sel = $("program-select"); sel.innerHTML = "";
+  const g1 = document.createElement("optgroup"); g1.label = "Starter programs";
+  S.starters.forEach((p, i) => g1.appendChild(new Option(p.name, "s" + i)));
+  const g2 = document.createElement("optgroup"); g2.label = "User (this browser)";
+  for (let i = 0; i < 40; i++) {
+    const t = S.user[i]; const name = t ? (programFromText(t) || {}).name : null;
+    g2.appendChild(new Option(`U${String(i + 1).padStart(2, "0")}  ${name || "(empty)"}`, "u" + i));
+  }
+  sel.append(g1, g2);
+  const slot = $("store-slot"); const keep = slot.value; slot.innerHTML = "";
+  for (let i = 0; i < 40; i++) slot.appendChild(new Option("U" + String(i + 1).padStart(2, "0"), String(i)));
+  slot.value = keep || "0";
+}
+function loadProgram(pr, label) {
+  S.program = JSON.parse(JSON.stringify(pr)); releaseAll(); sendWholeProgram(); refreshAll(); saveEditBuffer();
+  if (label) toast("Loaded " + label);
+}
+
+// ------------------------------------------------------------------ audio
+async function powerOn() {
+  if (S.ctx) {
+    if (S.ctx.state === "running") { await S.ctx.suspend(); setPower(false); } else { await S.ctx.resume(); setPower(true); }
+    return;
+  }
+  const ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" });
+  S.ctx = ctx;
+  const analyser = ctx.createAnalyser(); analyser.fftSize = 1024; S.analyser = analyser;
+  const out = ctx.createGain(); out.gain.value = 1; out.connect(ctx.destination); analyser.connect(out);
+  let mode = "worklet";
+  try {
+    const url = URL.createObjectURL(new Blob([WORKLET_SRC], { type: "application/javascript" }));
+    await ctx.audioWorklet.addModule(url);
+    const node = new AudioWorkletNode(ctx, "p10-engine", { numberOfInputs: 0, outputChannelCount: [2],
+      processorOptions: { wasm: wasmBytes.buffer.slice(0), os: S.os, serial: 1 } });
+    node.port.onmessage = e => { if (e.data.t === "m") drawMeters(e.data.m); };
+    node.connect(analyser);
+    S.engine = { post: m => node.port.postMessage(m) };
+  } catch (err) {
+    // Fallback: ScriptProcessor on the main thread (larger latency).
+    mode = "fallback";
+    const Core = P10Core();
+    const core = new Core(wasmBytes, ctx.sampleRate, S.os, 1);
+    const sp = ctx.createScriptProcessor(1024, 0, 2);
+    let tick = 0;
+    sp.onaudioprocess = ev => { const ob = ev.outputBuffer; if (core.render(ob.getChannelData(0), ob.getChannelData(1)) && ++tick % 2 === 0) drawMeters(core.meters()); };
+    sp.connect(analyser);
+    S.engine = { post: m => core.post(m) };
+  }
+  sendWholeProgram();
+  send({ t: "wheel", v: S.wheel || 0 });
+  await ctx.resume();
+  setPower(true);
+  S.audioMode = mode;
+  updateStatus();
+  requestAnimationFrame(drawScope);
+}
+function setPower(on) {
+  $("power").setAttribute("aria-pressed", String(on)); $("power-label").textContent = on ? "Power off" : "Power on";
+  if (!on) $("status").textContent = "Audio paused."; else updateStatus();
+}
+function updateStatus() {
+  if (!S.ctx) return;
+  const st = $("status");
+  st.textContent = `${(S.ctx.sampleRate / 1000).toFixed(1)} kHz · ${S.os}× oversampling · ${S.audioMode === "worklet" ? "audio thread" : "compatibility mode"}`;
+  st.classList.toggle("warn", S.audioMode !== "worklet");
+}
+
+function drawMeters(m) {
+  const leds = $("voices").children;
+  for (let v = 0; v < 10; v++) {
+    const lvl = Math.min(1, m[v] * 1.2);
+    leds[v].style.background = lvl > 0.01 ? (m[10 + v] > 0.5 ? "var(--led-b)" : "var(--led)") : "var(--led-off)";
+    leds[v].style.opacity = lvl > 0.01 ? String(0.35 + 0.65 * lvl) : "1";
+  }
+}
+function drawScope() {
+  const c = $("scope"), g = c.getContext("2d"); const a = S.analyser; if (!a) return;
+  const buf = new Float32Array(a.fftSize); a.getFloatTimeDomainData(buf);
+  let start = 0; for (let i = 1; i < buf.length / 2; i++) if (buf[i - 1] < 0 && buf[i] >= 0) { start = i; break; }
+  const css = getComputedStyle(document.documentElement);
+  g.clearRect(0, 0, c.width, c.height); g.strokeStyle = css.getPropertyValue("--display-fg").trim() || "#ffb547"; g.lineWidth = 2; g.beginPath();
+  const n = 480;
+  for (let i = 0; i < n; i++) { const x = i / n * c.width, y = c.height / 2 - (buf[start + i] || 0) * c.height * 1.4; i ? g.lineTo(x, y) : g.moveTo(x, y); }
+  g.stroke(); requestAnimationFrame(drawScope);
+}
+
+// --------------------------------------------------------------- keyboard
+const LOW = 36, HIGH = 96; // 61 keys, C2..C7 in MIDI-60=C4 naming
+function buildKeyboard() {
+  const old = $("keyboard"); const kb = old.cloneNode(false); old.replaceWith(kb); // drops old listeners
+  // Keys fill the strip on wide screens and scroll on narrow ones.
+  const avail = $("kbd-scroll").clientWidth - 2;
+  const whiteW = Math.max(22, Math.min(40, Math.floor(avail / 36))); let x = 0; const pos = {};
+  for (let n = LOW; n <= HIGH; n++) {
+    const black = [1, 3, 6, 8, 10].includes(n % 12);
+    const k = document.createElement("div"); k.className = black ? "b" : "w"; k.dataset.note = n;
+    if (!black) { k.style.left = x + "px"; k.style.width = whiteW + "px"; pos[n] = x; x += whiteW; if (n % 12 === 0) k.innerHTML = `<span class="c">${noteName(n)}</span>`; }
+    else { const bw = Math.round(whiteW * 0.62); k.style.left = (x - bw / 2) + "px"; k.style.width = bw + "px"; }
+    kb.appendChild(k);
+  }
+  kb.style.width = x + "px";
+  const split = document.createElement("div"); split.className = "split"; split.id = "split-marker"; kb.appendChild(split);
+  S.keyPos = pos;
+  const active = new Map(); // pointerId -> note
+  const keyAt = (cx, cy) => { const el = document.elementFromPoint(cx, cy); return el && el.dataset && el.dataset.note ? el : (el && el.parentElement && el.parentElement.dataset.note ? el.parentElement : null); };
+  const velFrom = (el, cy) => { const r = el.getBoundingClientRect(); return Math.max(0.15, Math.min(1, (cy - r.top) / r.height * 1.1)); };
+  kb.addEventListener("pointerdown", e => {
+    const el = keyAt(e.clientX, e.clientY); if (!el) return; e.preventDefault(); kb.setPointerCapture(e.pointerId);
+    const n = +el.dataset.note;
+    if (S.splitArm) { setProgramParam(P("split_point"), n); S.splitArm = false; $("split-btn").setAttribute("aria-pressed", "false"); toast("Split point " + noteName(n)); return; }
+    active.set(e.pointerId, n); noteOn(n, velFrom(el, e.clientY));
+  });
+  kb.addEventListener("pointermove", e => {
+    if (!active.has(e.pointerId)) return;
+    const el = keyAt(e.clientX, e.clientY); if (!el) return; const n = +el.dataset.note; const cur = active.get(e.pointerId);
+    if (n !== cur) { noteOff(cur); active.set(e.pointerId, n); noteOn(n, velFrom(el, e.clientY)); }
+  });
+  const up = e => { if (active.has(e.pointerId)) { noteOff(active.get(e.pointerId)); active.delete(e.pointerId); } };
+  kb.addEventListener("pointerup", up); kb.addEventListener("pointercancel", up);
+  if (!buildKeyboard.bound) {
+    buildKeyboard.bound = true;
+    let w = $("kbd-scroll").clientWidth;
+    new ResizeObserver(() => { const nw = $("kbd-scroll").clientWidth; if (Math.abs(nw - w) > 30) { w = nw; buildKeyboard(); drawSplitMarker(); } }).observe($("kbd-scroll"));
+  }
+  // Centre the view on middle C.
+  requestAnimationFrame(() => { const sc = $("kbd-scroll"); sc.scrollLeft = Math.max(0, (pos[60] || 0) - sc.clientWidth / 2 + 13); });
+}
+function drawSplitMarker() {
+  const m = $("split-marker"); if (!m || !S.keyPos) return;
+  const mode = Math.round(S.program.settings[P("layer_mode")]); const sp = Math.round(S.program.settings[P("split_point")]);
+  m.hidden = mode !== 1;
+  let n = sp; while (S.keyPos[n] === undefined && n > LOW) n--;
+  m.style.left = ((S.keyPos[n] ?? 0) - 1) + "px";
+}
+function keyEl(n) { return document.querySelector(`#keyboard [data-note="${n}"]`); }
+function noteOn(n, vel) {
+  if (n < 0 || n > 127) return;
+  S.held.set(n, (S.held.get(n) || 0) + 1);
+  send({ t: "on", n, v: vel }); const k = keyEl(n); if (k) k.classList.add("down");
+  if (!S.ctx) hintPower();
+}
+function noteOff(n) {
+  const c = (S.held.get(n) || 1) - 1; if (c > 0) { S.held.set(n, c); return; }
+  S.held.delete(n); send({ t: "off", n }); const k = keyEl(n); if (k) k.classList.remove("down");
+}
+function releaseAll() { for (const n of [...S.held.keys()]) { S.held.set(n, 1); noteOff(n); } send({ t: "panic" }); }
+let hinted = false;
+function hintPower() { if (hinted) return; hinted = true; toast("Press Power on to hear the synth"); }
+
+const KEYMAP = { z: 0, s: 1, x: 2, d: 3, c: 4, v: 5, g: 6, b: 7, h: 8, n: 9, j: 10, m: 11, ",": 12, l: 13, ".": 14, ";": 15, "/": 16,
+  q: 12, 2: 13, w: 14, 3: 15, e: 16, r: 17, 5: 18, t: 19, 6: 20, y: 21, 7: 22, u: 23, i: 24, 9: 25, o: 26, 0: 27, p: 28 };
+const downKeys = new Map();
+function typing(e) { const t = e.target; return t && (t.tagName === "INPUT" && t.type !== "range" || t.tagName === "TEXTAREA" || t.tagName === "SELECT"); }
+window.addEventListener("keydown", e => {
+  if (typing(e) || e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === "arrowleft" && !e.target.closest?.(".knob")) { shiftOctave(-12); e.preventDefault(); return; }
+  if (k === "arrowright" && !e.target.closest?.(".knob")) { shiftOctave(12); e.preventDefault(); return; }
+  if (k === " ") { if (!e.repeat) toggleHold(); e.preventDefault(); return; }
+  if (!(k in KEYMAP) || e.repeat) return;
+  const n = S.octave + KEYMAP[k]; downKeys.set(k, n); noteOn(n, +$("vel").value / 127); e.preventDefault();
+});
+window.addEventListener("keyup", e => { const k = e.key.toLowerCase(); if (downKeys.has(k)) { noteOff(downKeys.get(k)); downKeys.delete(k); } });
+window.addEventListener("blur", () => { for (const [k, n] of downKeys) noteOff(n); downKeys.clear(); });
+function shiftOctave(d) { S.octave = Math.min(96, Math.max(12, S.octave + d)); $("oct-readout").textContent = noteName(S.octave); }
+function toggleHold() { S.sustain = !S.sustain; send({ t: "sus", v: S.sustain }); $("hold-btn").setAttribute("aria-pressed", String(S.sustain)); }
+
+// ------------------------------------------------------------------ wheels
+function setupWheel(el, spring, onChange) {
+  const thumb = el.querySelector(".thumb"); let value = spring ? 0.5 : 0, active = false;
+  const draw = () => { thumb.style.top = `calc(${(1 - value) * 100}% - ${(1 - value) * 18}px)`; el.setAttribute("aria-valuenow", value.toFixed(2)); };
+  const fromY = y => { const r = el.getBoundingClientRect(); value = Math.min(1, Math.max(0, 1 - (y - r.top - 9) / (r.height - 18))); draw(); onChange(value); };
+  el.addEventListener("pointerdown", e => { active = true; el.setPointerCapture(e.pointerId); fromY(e.clientY); e.preventDefault(); });
+  el.addEventListener("pointermove", e => active && fromY(e.clientY));
+  const up = () => { active = false; if (spring) { value = 0.5; draw(); onChange(value); } };
+  el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+  el.addEventListener("keydown", e => { if (e.key === "ArrowUp") value = Math.min(1, value + 0.05); else if (e.key === "ArrowDown") value = Math.max(0, value - 0.05); else return; e.preventDefault(); e.stopPropagation(); draw(); onChange(value); });
+  if (spring) el.addEventListener("keyup", e => { if (e.key.startsWith("Arrow")) { value = 0.5; draw(); onChange(value); } });
+  draw();
+  return { set(v) { value = v; draw(); } };
+}
+
+// -------------------------------------------------------------------- MIDI
+async function setupMidi() {
+  const sel = $("midi-select");
+  if (!navigator.requestMIDIAccess) { sel.disabled = true; sel.title = "This browser has no Web MIDI"; return; }
+  let access;
+  try { access = await navigator.requestMIDIAccess(); } catch (e) { sel.disabled = true; sel.title = "MIDI access was refused here"; return; }
+  const fill = () => {
+    const keep = sel.value; sel.innerHTML = "<option value=''>None</option><option value='*'>All inputs</option>";
+    access.inputs.forEach(i => sel.appendChild(new Option(i.name, i.id)));
+    sel.value = keep || (access.inputs.size ? "*" : "");
+    bind();
+  };
+  const bind = () => access.inputs.forEach(i => { i.onmidimessage = (sel.value === "*" || sel.value === i.id) ? onMidi : null; });
+  sel.onchange = bind; access.onstatechange = fill; fill();
+}
+let nrpn = { msb: 0, lsb: 0, data: 0, on: false };
+function onMidi(ev) {
+  const [st, d1 = 0, d2 = 0] = ev.data; const type = st & 0xf0;
+  if (type === 0x90 && d2 > 0) noteOn(d1, d2 / 127);
+  else if (type === 0x80 || type === 0x90) noteOff(d1);
+  else if (type === 0xe0) { const v = ((d2 << 7) | d1) - 8192; send({ t: "bend", v: Math.max(-1, v / 8191) }); S.bendWheel.set(0.5 + v / 16384); }
+  else if (type === 0xd0) send({ t: "at", v: d1 / 127 });
+  else if (type === 0xc0) { const p = S.starters[d1]; if (p) loadProgram(p, p.name); }
+  else if (type === 0xb0) handleCC(d1, d2);
+}
+function handleCC(cc, v) {
+  if (cc === 1) { S.wheel = v / 127; send({ t: "wheel", v: S.wheel }); S.modWheel.set(S.wheel); return; }
+  if (cc === 64) { if ((v >= 64) !== S.sustain) toggleHold(); return; }
+  if (cc === 123 || cc === 120) { releaseAll(); return; }
+  if (cc === 99) { nrpn.msb = v; nrpn.on = true; return; } if (cc === 98) { nrpn.lsb = v; nrpn.on = true; return; }
+  if (cc === 6 && nrpn.on) { applyNrpn((nrpn.msb << 7) | nrpn.lsb, v / 127); return; }
+  if (S.learnTarget) { S.ccMap[cc] = S.learnTarget.id; store("p10.cc", S.ccMap); toast(`CC ${cc} → ${S.learnTarget.label}`); S.learnTarget.el.classList.remove("learn-armed"); S.learnTarget = null; }
+  const mapped = S.ccMap[cc] ?? (META.layer.find(p => p.cc === cc) || {}).id;
+  if (mapped === undefined) return;
+  const m = META.layer[mapped];
+  const val = m.kind === 1 ? (v >= 64 ? 1 : 0) : m.kind === 2 ? Math.round(m.min + v / 127 * (m.max - m.min)) : v / 127;
+  setLayerParam(S.edit, mapped, val);
+}
+function applyNrpn(num, norm) {
+  if (num < 512) { const l = num >> 8, id = num & 255, m = META.layer[id]; if (!m) return;
+    setLayerParam(l, id, m.kind === 1 ? (norm >= 0.5 ? 1 : 0) : m.kind === 2 ? Math.round(m.min + norm * (m.max - m.min)) : norm); }
+}
+function armLearn(def, el) {
+  if (S.learnTarget) S.learnTarget.el.classList.remove("learn-armed");
+  S.learnTarget = { id: def.id, label: def.label, el }; el.classList.add("learn-armed"); toast("Move a controller to assign " + def.label);
+}
+
+// --------------------------------------------------------------------- boot
+async function boot() {
+  await loadMeta();
+  S.starters = starters();
+  S.user = recall("p10.user", []);
+  S.ccMap = recall("p10.cc", {});
+  const edit = recall("p10.edit", null);
+  S.program = (edit && programFromText(edit)) || JSON.parse(JSON.stringify(S.starters[3]));
+  buildPanel(); buildKeyboard(); buildProgramList(); refreshAll();
+  if (!edit) $("program-select").value = "s3";
+  for (let v = 0; v < 10; v++) { const d = document.createElement("span"); d.className = "v"; d.title = "Voice " + (v + 1); $("voices").appendChild(d); }
+  $("oct-readout").textContent = noteName(S.octave);
+
+  $("power").onclick = powerOn;
+  $("program-select").onchange = e => {
+    const v = e.target.value; const i = +v.slice(1);
+    if (v[0] === "s") loadProgram(S.starters[i], S.starters[i].name);
+    else { const t = S.user[i]; const p = t && programFromText(t); if (p) loadProgram(p, p.name); else toast("Slot U" + (i + 1) + " is empty"); }
+  };
+  $("program-name").oninput = e => { S.program.name = e.target.value; saveEditBuffer(); };
+  $("store-btn").onclick = () => {
+    const i = +$("store-slot").value; S.user[i] = programToText(S.program); store("p10.user", S.user); buildProgramList();
+    $("program-select").value = "u" + i; toast(`Saved “${S.program.name}” to U${String(i + 1).padStart(2, "0")}`);
+  };
+  $("init-btn").onclick = () => loadProgram(initProgram(), "basic program");
+  $("mode-seg").onclick = e => { const b = e.target.closest("button"); if (!b) return; releaseAll(); setProgramParam(P("layer_mode"), +b.dataset.mode); };
+  $("layer-seg").onclick = e => { const b = e.target.closest("button"); if (!b) return; S.edit = +b.dataset.layer; refreshAll(); };
+  $("split-btn").onclick = () => { S.splitArm = !S.splitArm; $("split-btn").setAttribute("aria-pressed", String(S.splitArm)); if (S.splitArm) toast("Press a key to set the split point"); };
+  $("quality-seg").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return; S.os = +b.dataset.os;
+    [...$("quality-seg").children].forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    releaseAll(); send({ t: "os", v: S.os }); sendWholeProgram(); updateStatus();
+  };
+  $("tune-btn").onclick = () => { send({ t: "tune" }); toast("Tuned all ten voices"); };
+  $("panic-btn").onclick = () => { releaseAll(); if (S.sustain) toggleHold(); };
+  $("learn-btn").onclick = () => { S.learn = !S.learn; $("learn-btn").setAttribute("aria-pressed", String(S.learn)); if (!S.learn && S.learnTarget) { S.learnTarget.el.classList.remove("learn-armed"); S.learnTarget = null; } if (S.learn) toast("Click a knob, then move a MIDI controller"); };
+  $("oct-down").onclick = () => shiftOctave(-12); $("oct-up").onclick = () => shiftOctave(12);
+  $("vel").oninput = e => { $("vel-readout").textContent = e.target.value; };
+  $("hold-btn").onclick = toggleHold;
+  $("copy-btn").onclick = () => {
+    const ta = $("prog-text");
+    navigator.clipboard.writeText(ta.value).then(() => toast("Program text copied"), () => { ta.focus(); ta.select(); toast("Text selected; press Ctrl/Cmd+C"); });
+  };
+  $("apply-btn").onclick = () => { const p = programFromText($("prog-text").value); if (p) loadProgram(p, p.name); else toast("No program found in that text"); };
+  $("file-in").onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(t => { const p = programFromText(t); if (p) loadProgram(p, p.name); else toast("That file has no program in it"); }); };
+  S.bendWheel = setupWheel($("bend-wheel"), true, v => send({ t: "bend", v: (v - 0.5) * 2 }));
+  S.modWheel = setupWheel($("mod-wheel"), false, v => { S.wheel = v; send({ t: "wheel", v }); });
+  setupMidi();
+}
+boot().catch(err => { $("status").textContent = "Could not start the engine: " + err.message; $("status").classList.add("warn"); });
+</script>

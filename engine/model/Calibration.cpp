@@ -1,9 +1,19 @@
 #include "Calibration.h"
 
+#include <cstdlib>
 #include <fstream>
 #include <sstream>
 
 namespace p10 {
+
+bool parseNumber(const std::string& text, double& out) {
+    if (text.empty()) return false;
+    char* end = nullptr;
+    const double v = std::strtod(text.c_str(), &end);
+    if (end == text.c_str() || *end != '\0') return false;
+    out = v;
+    return true;
+}
 
 double VintageSigma::at(double v) const {
     // Piecewise-linear across the four anchors at 0, 1/3, 2/3, 1.
@@ -167,9 +177,7 @@ bool CalibrationModel::loadFromText(const std::string& text, std::vector<std::st
         bool found = false;
         for (auto& en : reg) {
             if (en.key == key) {
-                try {
-                    *en.value = std::stod(val);
-                } catch (...) {
+                if (!parseNumber(val, *en.value)) {
                     ok = false;
                     if (errors) errors->push_back("bad value for " + key);
                 }

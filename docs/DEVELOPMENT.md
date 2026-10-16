@@ -13,7 +13,7 @@ against reference hardware yet**, because none was available.
 | 5. Vintage / component variation | Done (persistent personalities, drift, tuning/calibration model) |
 | 6. LFO, wheel mod, glide, unison, velocity, aftertouch | Done |
 | 7. Split / stack bi-timbrality | Done |
-| 8. Final UI and preset system | Preset system done (engine-side). **UI deliberately not built**: the spec requires the engine to be validated first. `engine/ui/PanelLayout.h` defines the control surface (sections in panel order, one control per function) for the future UI |
+| 8. Final UI and preset system | Done as a browser app (`web/`), built at the owner's request before hardware validation. It follows the panel order in `engine/ui/PanelLayout.h`. If validation changes the engine, rebuild with `web/build.sh` |
 
 ## Known gaps and open questions
 
@@ -32,8 +32,8 @@ against reference hardware yet**, because none was available.
   Neither is the hardware's own MIDI CC/NRPN map: the engine uses its own
   CC map plus NRPN for every parameter. The SysEx translation layer is an
   unimplemented interface (`PatchTranslator`).
-* **Real-time host**: there is an offline renderer and a host-agnostic API,
-  but no live audio-device backend or plugin wrapper yet.
+* **Real-time host**: the browser app is the live instrument. There is no
+  native standalone or AU/VST3 wrapper yet; the engine API is ready for one.
 * **CPU**: about 50 % of one core at 4× for ten fully active voices in the
   worst case. Needs SIMD/optimisation before a live release (see
   ARCHITECTURE.md).
