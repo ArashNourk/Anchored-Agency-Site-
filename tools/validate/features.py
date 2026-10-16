@@ -232,7 +232,12 @@ def ex_centroid(x, fs, s):
         y = seg(x, fs, a + i * hop, hop)
         mag, df = spectrum(y, fs, pad=1)
         f = np.arange(len(mag)) * df
-        out.append(float(np.log2(np.sum(mag * f) / (np.sum(mag) + 1e-30) + 1e-9)))
+        # Power-weighted, and only bins within 60 dB of the peak: invariant to
+        # the capture chain's broadband noise floor (a magnitude-weighted
+        # centroid over all bins reads a noisier recording as brighter).
+        p = mag ** 2
+        p = np.where(p > np.max(p) * 1e-6, p, 0.0)
+        out.append(float(np.log2(np.sum(p * f) / (np.sum(p) + 1e-30) + 1e-9)))
     return {"log2_centroid": out}
 
 

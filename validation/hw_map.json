@@ -1,0 +1,605 @@
+{
+ "_doc": "Fill nrpn (number) and max (hardware value at knob position 1.0) or offset from the Prophet-10 Rev4 documentation. Leave nrpn null when the parameter has none.",
+ "params": {
+  "A.lfo_freq": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.lfo_saw": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.lfo_tri": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.lfo_square": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.lfo_initial_amount": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.wm_source_mix": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.wm_freq_a": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.wm_freq_b": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.wm_pw_a": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.wm_pw_b": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.wm_filter": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.at_filter": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.at_lfo_amount": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.pm_filter_env": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.pm_osc_b": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.pm_freq_a": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.pm_pw_a": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.pm_filter": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.osca_freq": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.osca_saw": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.osca_pulse": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.osca_pw": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.osca_sync": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.oscb_freq": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.oscb_fine": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.oscb_saw": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.oscb_tri": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.oscb_pulse": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.oscb_pw": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.oscb_lofreq": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.oscb_kbd": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.mix_osca": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.mix_oscb": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.mix_noise": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.flt_cutoff": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.flt_resonance": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.flt_env_amt": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.flt_kbd": {
+   "kind": "stepped",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.flt_rev": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.flt_vel": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.fenv_attack": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.fenv_decay": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.fenv_sustain": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.fenv_release": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.aenv_attack": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.aenv_decay": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.aenv_sustain": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.aenv_release": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.aenv_vel": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.glide": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.unison": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.unison_voices": {
+   "kind": "stepped",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.unison_detune": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.key_priority": {
+   "kind": "stepped",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.retrigger": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.bend_range": {
+   "kind": "stepped",
+   "nrpn": null,
+   "offset": 0
+  },
+  "A.volume": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "A.vintage": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.lfo_freq": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.lfo_saw": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.lfo_tri": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.lfo_square": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.lfo_initial_amount": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.wm_source_mix": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.wm_freq_a": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.wm_freq_b": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.wm_pw_a": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.wm_pw_b": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.wm_filter": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.at_filter": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.at_lfo_amount": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.pm_filter_env": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.pm_osc_b": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.pm_freq_a": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.pm_pw_a": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.pm_filter": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.osca_freq": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.osca_saw": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.osca_pulse": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.osca_pw": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.osca_sync": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.oscb_freq": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.oscb_fine": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.oscb_saw": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.oscb_tri": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.oscb_pulse": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.oscb_pw": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.oscb_lofreq": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.oscb_kbd": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.mix_osca": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.mix_oscb": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.mix_noise": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.flt_cutoff": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.flt_resonance": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.flt_env_amt": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.flt_kbd": {
+   "kind": "stepped",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.flt_rev": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.flt_vel": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.fenv_attack": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.fenv_decay": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.fenv_sustain": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.fenv_release": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.aenv_attack": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.aenv_decay": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.aenv_sustain": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.aenv_release": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.aenv_vel": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.glide": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.unison": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.unison_voices": {
+   "kind": "stepped",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.unison_detune": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.key_priority": {
+   "kind": "stepped",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.retrigger": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.bend_range": {
+   "kind": "stepped",
+   "nrpn": null,
+   "offset": 0
+  },
+  "B.volume": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "B.vintage": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  },
+  "P.layer_mode": {
+   "kind": "stepped",
+   "nrpn": null,
+   "offset": 0
+  },
+  "P.split_point": {
+   "kind": "stepped",
+   "nrpn": null,
+   "offset": 0
+  },
+  "P.split_upper_b": {
+   "kind": "switch",
+   "nrpn": null,
+   "offset": 0
+  },
+  "P.layer_balance": {
+   "kind": "continuous",
+   "nrpn": null,
+   "max": null
+  }
+ }
+}

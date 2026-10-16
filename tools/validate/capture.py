@@ -59,25 +59,35 @@ def parse_scenario(path):
 
 
 def write_map_template(path=MAP_PATH):
-    """Every engine parameter, with empty NRPN number and hardware range."""
-    keys = []
+    """Every engine parameter with its kind, and empty NRPN number / range.
+    continuous: hardware value = round(knob position * max)
+    switch, stepped: hardware value = engine value + offset"""
+    params = {}
     for layer in "AB":
-        for p in _layer_keys():
-            keys.append(f"{layer}.{p}")
-    keys += ["P.layer_mode", "P.split_point", "P.split_upper_b", "P.layer_balance"]
-    data = {"_doc": "Fill nrpn (number) and max (hardware value for knob position 1.0) from the "
-                    "Prophet-10 Rev4 documentation. Leave null when the parameter has no NRPN.",
-            "params": {k: {"nrpn": None, "max": None} for k in keys}}
+        for key, kind in _layer_keys():
+            e = {"kind": kind, "nrpn": None}
+            if kind == "continuous":
+                e["max"] = None
+            else:
+                e["offset"] = 0
+            params[f"{layer}.{key}"] = e
+    for key, kind in (("layer_mode", "stepped"), ("split_point", "stepped"),
+                      ("split_upper_b", "switch"), ("layer_balance", "continuous")):
+        params[f"P.{key}"] = {"kind": kind, "nrpn": None, **({"max": None} if kind == "continuous" else {"offset": 0})}
+    data = {"_doc": "Fill nrpn (number) and max (hardware value at knob position 1.0) or offset from the "
+                    "Prophet-10 Rev4 documentation. Leave nrpn null when the parameter has none.",
+            "params": params}
     with open(path, "w") as f:
         json.dump(data, f, indent=1)
     return path
 
 
 def _layer_keys():
+    """(key, kind) for every layer parameter, read from the engine's table."""
     import re
     src = open(os.path.join(corpus.ROOT, "engine", "model", "Params.cpp")).read()
     block = src[src.index("kLayer[kNumLayerParams]"):src.index("kProgram[kNumProgramParams]")]
-    return re.findall(r'\{"([a-z0-9_]+)",', block)
+    return [(k, kind.lower()) for k, kind in re.findall(r'\{"([a-z0-9_]+)", "[^"]*", S::\w+, K::(\w+)', block)]
 
 
 def _nrpn_msgs(ch, num, value):
@@ -87,9 +97,15 @@ def _nrpn_msgs(ch, num, value):
 
 def _param_msgs(pmap, ch, key, value):
     e = pmap.get(key)
-    if not e or e.get("nrpn") is None or e.get("max") is None:
+    if not e or e.get("nrpn") is None:
         return None
-    return _nrpn_msgs(ch, int(e["nrpn"]), int(round(value * e["max"])) if e["max"] > 2 else int(round(value)))
+    if e.get("kind") == "continuous":
+        if e.get("max") is None:
+            return None
+        hw = int(round(value * e["max"]))
+    else:
+        hw = int(round(value)) + int(e.get("offset", 0))
+    return _nrpn_msgs(ch, int(e["nrpn"]), hw)
 
 
 def capture(unit, session, out_root, tests=None, takes=3, midi_port=None, audio_device=None, channel=1, meta=None):

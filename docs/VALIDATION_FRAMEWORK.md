@@ -144,11 +144,15 @@ scenario, or `CalibrationModel::loadFromFile`.
   range change. C08 therefore measures every voice's cutoff, so each voice's
   offset is pinned relative to the voice average and the global map becomes
   identifiable.
-* The validation-only sync-sweep test (C09) exposed that the first corpus
-  never measured each voice's Osc B tuning: a sync timbre depends on the A/B
-  pitch ratio, so an unmeasured Osc B offset showed up as a 3 % spectral
-  error. C08 now includes Osc B strikes. Validation-only tests exist to
-  catch exactly this kind of gap.
+* Features must be invariant to the capture chain. The first sync-sweep
+  feature (magnitude-weighted spectral centroid) read a recording with a
+  −85 dBFS noise floor as 3 % brighter while the underlying sound differed by
+  0.5 %. It is now power-weighted over the bins within 60 dB of the peak. The
+  self-test adds noise, gain and latency to its synthetic captures for
+  exactly this reason.
+* C08 also measures every voice's Osc B pitch. A sync timbre depends on the
+  A/B pitch ratio of the voice, so per-voice Osc B tuning belongs in the unit
+  profile.
 * The same applies, more weakly, to the 3340 high-frequency tracking
   constant, which is seen only through voice 1. It is reported as an
   effective value for that voice.
@@ -169,7 +173,17 @@ cannot prove: that the model's structure matches the real instrument. If the
 hardware residuals stay large after fitting, the topology is wrong somewhere,
 not just the constants, and the report shows which test and feature.
 
-Latest result (`validation/selftest_report.md`): see the end of this document.
+Latest result ([validation/selftest_report.md](../validation/selftest_report.md)):
+
+* timing: the hidden 7.3 ms latency recovered, every take placed within 0.04 ms
+  of its true position;
+* features within tolerance: 29 of 146 with default constants, 146 of 146
+  after fitting;
+* constants recovered within 2 % (resonance, cutoff map, envelopes, Poly Mod,
+  LFO), apart from the 3340 HF tracking constant: +27 % against the global
+  truth, because it absorbs voice 1's own hidden tolerance. Its features
+  still pass, so it is an effective value for that unit;
+* runtime about 35 minutes on 4 cores (two passes).
 
 ## 6. Engineering obligations this creates
 
