@@ -1,0 +1,18 @@
+# Unison: 10 voices, detune 0, 0.3, 0.7; then 4 voices; key priority last.
+oversample 4
+set A.unison 1
+set A.unison_voices 10
+set A.unison_detune 0
+set A.flt_cutoff 0.7
+set A.aenv_attack 0
+set A.aenv_sustain 1
+at 0.0 on 36 100
+at 2.0 set A.unison_detune 0.3
+at 4.0 set A.unison_detune 0.7
+at 6.0 off 36
+at 6.5 set A.unison_voices 4
+at 6.5 on 36 100
+at 7.5 on 43 100
+at 8.5 off 43
+at 9.5 off 36
+length 10.5

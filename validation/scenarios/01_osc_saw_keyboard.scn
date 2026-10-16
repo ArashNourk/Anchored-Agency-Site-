@@ -1,0 +1,26 @@
+# Oscillator A sawtooth across the keyboard. Filter fully open, no resonance,
+# amp env gate-like. Compare harmonic spectra per note (p10analyze spectrum).
+oversample 8
+set A.osca_saw 1
+set A.mix_osca 0.8
+set A.flt_cutoff 1
+set A.flt_resonance 0
+set A.flt_kbd 0
+set A.aenv_attack 0
+set A.aenv_sustain 1
+set A.aenv_release 0.1
+at 0.0 on 24 100
+at 1.4 off 24
+at 1.5 on 36 100
+at 2.9 off 36
+at 3.0 on 48 100
+at 4.4 off 48
+at 4.5 on 60 100
+at 5.9 off 60
+at 6.0 on 72 100
+at 7.4 off 72
+at 7.5 on 84 100
+at 8.9 off 84
+at 9.0 on 96 100
+at 10.4 off 96
+length 11

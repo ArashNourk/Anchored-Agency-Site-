@@ -1,0 +1,21 @@
+# Filter cutoff response on noise, both models, res 0 and res 0.5.
+# Measure transfer by comparing to an open-filter noise reference (first 2 s).
+oversample 4
+set A.osca_saw 0
+set A.mix_osca 0
+set A.mix_noise 0.6
+set A.flt_kbd 0
+set A.aenv_attack 0
+set A.aenv_sustain 1
+set A.flt_cutoff 1
+at 0.0 on 60 100
+ramp 2 12 A.flt_cutoff 0 1
+at 12.5 set A.flt_resonance 0.5
+ramp 13 23 A.flt_cutoff 0 1
+at 23.5 set A.flt_rev 1
+at 23.5 set A.flt_resonance 0
+ramp 24 34 A.flt_cutoff 0 1
+at 34.5 set A.flt_resonance 0.5
+ramp 35 45 A.flt_cutoff 0 1
+at 45 off 60
+length 45.5

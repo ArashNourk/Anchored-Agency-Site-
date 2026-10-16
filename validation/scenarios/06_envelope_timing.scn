@@ -1,0 +1,21 @@
+# Amp envelope timing and curvature: attack, decay, release at several knob
+# positions on a steady saw. Feeds `p10analyze envelope` / `fit-env`.
+oversample 4
+set A.flt_cutoff 1
+set A.aenv_attack 0.3
+set A.aenv_decay 0.4
+set A.aenv_sustain 0.3
+set A.aenv_release 0.4
+at 0.0 on 48 100
+at 2.0 off 48
+at 4.0 set A.aenv_attack 0.5
+at 4.0 set A.aenv_decay 0.55
+at 4.0 set A.aenv_release 0.55
+at 4.0 on 48 100
+at 8.0 off 48
+at 12.0 set A.aenv_attack 0.65
+at 12.0 set A.aenv_decay 0.7
+at 12.0 set A.aenv_release 0.7
+at 12.0 on 48 100
+at 18.0 off 48
+length 26

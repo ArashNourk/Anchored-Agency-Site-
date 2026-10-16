@@ -1,0 +1,20 @@
+# Oscillator A pulse at several widths, note C3. Measure duty cycle (time
+# domain) and harmonic nulls. Includes the narrow end of the range.
+oversample 8
+set A.osca_saw 0
+set A.osca_pulse 1
+set A.flt_cutoff 1
+set A.flt_kbd 0
+set A.aenv_attack 0
+set A.aenv_sustain 1
+set A.aenv_release 0.1
+set A.osca_pw 0.5
+at 0.0 on 48 100
+at 1.0 set A.osca_pw 0.25
+at 2.0 set A.osca_pw 0.10
+at 3.0 set A.osca_pw 0.05
+at 4.0 set A.osca_pw 0.02
+at 5.0 set A.osca_pw 0.0
+at 6.0 set A.osca_pw 0.98
+at 7.0 off 48
+length 7.5

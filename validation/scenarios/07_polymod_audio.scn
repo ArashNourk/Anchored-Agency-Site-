@@ -1,0 +1,24 @@
+# Audio-rate Poly Mod: Osc B (triangle, keyboard off, fixed pitch) -> Freq A,
+# then -> Filter. Measure sideband levels vs amount.
+oversample 8
+set A.oscb_saw 0
+set A.oscb_tri 1
+set A.oscb_kbd 0
+set A.oscb_freq 0.5
+set A.pm_freq_a 1
+set A.flt_cutoff 1
+set A.aenv_attack 0
+set A.aenv_sustain 1
+set A.pm_osc_b 0.1
+at 0.0 on 57 100
+at 1.5 set A.pm_osc_b 0.3
+at 3.0 set A.pm_osc_b 0.5
+at 4.5 set A.pm_freq_a 0
+at 4.5 set A.pm_filter 1
+at 4.5 set A.flt_cutoff 0.55
+at 4.5 set A.flt_resonance 0.5
+at 4.5 set A.pm_osc_b 0.1
+at 6.0 set A.pm_osc_b 0.3
+at 7.5 set A.pm_osc_b 0.5
+at 9.0 off 57
+length 9.5

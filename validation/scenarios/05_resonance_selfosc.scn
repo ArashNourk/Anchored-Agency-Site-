@@ -1,0 +1,36 @@
+# Self-oscillation frequency and level vs cutoff knob and resonance knob, both
+# models. No oscillator input. Feeds `p10analyze fit-cutoff` and the
+# resonance onset calibration (A-FLT-01, A-FLT-1x/2x).
+oversample 4
+set A.mix_osca 0
+set A.flt_kbd 0
+set A.aenv_attack 0
+set A.aenv_sustain 1
+set A.flt_resonance 1
+set A.flt_cutoff 0.3
+at 0.0 on 60 100
+at 1.0 set A.flt_cutoff 0.4
+at 2.0 set A.flt_cutoff 0.5
+at 3.0 set A.flt_cutoff 0.6
+at 4.0 set A.flt_cutoff 0.7
+at 5.0 set A.flt_cutoff 0.8
+at 6.0 set A.flt_cutoff 0.6
+at 6.0 set A.flt_resonance 0.95
+at 7.0 set A.flt_resonance 0.9
+at 8.0 set A.flt_resonance 0.85
+at 9.0 set A.flt_resonance 0.8
+at 10.0 set A.flt_rev 1
+at 10.0 set A.flt_resonance 1
+at 10.0 set A.flt_cutoff 0.3
+at 11.0 set A.flt_cutoff 0.4
+at 12.0 set A.flt_cutoff 0.5
+at 13.0 set A.flt_cutoff 0.6
+at 14.0 set A.flt_cutoff 0.7
+at 15.0 set A.flt_cutoff 0.8
+at 16.0 set A.flt_cutoff 0.6
+at 16.0 set A.flt_resonance 0.95
+at 17.0 set A.flt_resonance 0.9
+at 18.0 set A.flt_resonance 0.85
+at 19.0 set A.flt_resonance 0.8
+at 20 off 60
+length 20.5

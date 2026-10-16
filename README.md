@@ -1,0 +1,56 @@
+# p10 — a Prophet-10 Rev4 behavioural model
+
+A virtual analog synthesizer engine whose behavioural specification is the
+Sequential Prophet-10 Rev4: ten persistent analog-modelled voices, each with
+two CEM3340-style oscillators, a mixer with noise and nonlinear gain staging,
+switchable SSM2040 (Rev1/2) and CEM3320 (Rev3) four-pole filters, RC-style
+filter and amp envelopes, and the per-voice audio-rate Poly Mod section. Also
+included: the Prophet LFO / wheel-mod architecture, Vintage component
+variation with a tuning/calibration model, glide, unison, velocity,
+aftertouch, and split/stack bi-timbral operation.
+
+This is an independent project. It is not affiliated with or endorsed by
+Sequential. It uses no Sequential artwork or trade dress and ships no
+factory programs.
+
+## Status
+
+The sound engine, the measurement tooling and the validation procedure are
+in place. **The model has not yet been compared with a real Prophet-10
+Rev4.** Every constant that public documentation does not establish is
+isolated, documented and calibratable, so the remaining work is measurement,
+not re-engineering. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+## Layout
+
+```
+engine/          C++17 DSP engine (no UI / audio-API / plugin dependencies)
+  dsp/           BLEP tables, CEM3340 oscillator, filter models, envelopes, decimator
+  model/         parameters, calibration constants, Vintage/tuning engine
+  voice/         voice, layer modulation (LFO, wheel, aftertouch), allocator
+  midi/ preset/  MIDI performance layer, program storage
+  io/ ui/        WAV I/O and host interface; control-surface description
+apps/p10render   offline scenario renderer
+tests/           engine self-validation tests
+validation/      scenario scripts for hardware/software comparison
+tools/analysis/  measurement, comparison and calibration-fitting tools (numpy)
+docs/            architecture, assumption register, validation procedure, status
+```
+
+## Build
+
+```
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+./build/p10tests                                  # engine tests
+./build/p10render validation/scenarios/07_polymod_audio.scn polymod.wav
+./build/p10render --dump-calibration > my.cal     # every calibratable constant
+python3 tools/analysis/p10analyze.py spectrum polymod.wav --start 0.5 --dur 0.8
+```
+
+## Documentation
+
+* [Architecture](docs/ARCHITECTURE.md): module split, signal path, band-limiting, filter solving, Vintage.
+* [Assumption register](docs/ASSUMPTIONS.md): every uncertain value, why it was chosen, how to measure it.
+* [Validation procedure](docs/VALIDATION.md): capture setup, the 13 comparisons, acceptance targets.
+* [Development status](docs/DEVELOPMENT.md): progress against the development sequence, known gaps.

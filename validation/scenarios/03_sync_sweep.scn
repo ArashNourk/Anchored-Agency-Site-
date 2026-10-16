@@ -1,0 +1,18 @@
+# Classic sync sweep: Osc A synced to B, Poly Mod filter-env -> Freq A.
+oversample 8
+set A.osca_sync 1
+set A.osca_saw 1
+set A.mix_osca 0.8
+set A.pm_filter_env 0.75
+set A.pm_freq_a 1
+set A.fenv_attack 0
+set A.fenv_decay 0.75
+set A.fenv_sustain 0
+set A.flt_cutoff 1
+set A.aenv_attack 0
+set A.aenv_sustain 1
+at 0.0 on 48 100
+at 3.0 off 48
+at 3.5 on 60 100
+at 6.5 off 60
+length 7.5

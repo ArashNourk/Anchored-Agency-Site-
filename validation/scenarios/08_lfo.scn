@@ -1,0 +1,24 @@
+# LFO rate and depth: triangle -> Freq A with initial amount, then mod wheel,
+# then square, then saw+tri combined. Measure with `p10analyze pitchtrack`.
+oversample 4
+set A.lfo_tri 1
+set A.wm_freq_a 1
+set A.wm_freq_b 0
+set A.flt_cutoff 1
+set A.aenv_attack 0
+set A.aenv_sustain 1
+set A.lfo_freq 0.4
+set A.lfo_initial_amount 0.5
+at 0.0 on 60 100
+at 4.0 set A.lfo_initial_amount 0
+at 4.0 cc 1 127
+at 8.0 cc 1 0
+at 8.0 set A.lfo_initial_amount 0.5
+at 8.0 set A.lfo_tri 0
+at 8.0 set A.lfo_square 1
+at 12.0 set A.lfo_square 0
+at 12.0 set A.lfo_saw 1
+at 12.0 set A.lfo_tri 1
+at 12.0 set A.lfo_freq 0.6
+at 16.0 off 60
+length 16.5
