@@ -42,7 +42,7 @@ calibration constants it informs.
 | C05 | Amp envelope | attack time at 3 knob positions, decay and release τ at 2 each | 5 % (ln) | envelope ranges and taper |
 | C06 | Poly Mod Osc B → Freq A depth | peak-to-peak pitch deviation at 3 amounts, modulation rate | 3 %; 3 % | Poly Mod range and taper, Lo Freq shift |
 | C07 | LFO → Freq A | depth and rate at 3 rate settings | 5 %; 2 % | LFO range, wheel/initial depth range |
-| C08 | Voice fingerprint | per-voice pitch, level and decay time over 30 strikes | 0.3 cent; 0.2 dB; 3 % | unit voice profile |
+| C08 | Voice fingerprint | per-voice pitch, level and decay time over 30 strikes; per-voice self-oscillation (cutoff offset); per-voice Osc B pitch | 0.3 cent; 0.2 dB; 3 %; 5 cents; 0.3 cent | unit voice profile |
 | C09 | Sync sweep | spectral-centroid trajectory | 3 % | (validation only) |
 
 The corpus grows with the model. The next additions in priority order are
@@ -115,13 +115,13 @@ with a bounded Nelder–Mead search, log-scaled where a constant spans decades.
 The emulator renders run in the loop. The objective is the sum of squared
 tolerance-normalised residuals of that group's features.
 
-1. **unit_profile**: per-voice tuning, VCA gain and envelope-time offsets
-   (`unit.vN.*`, A-UNIT-01), solved iteratively from C08. Mean level and mean
-   envelope time are left to the session gain and the envelope fit.
+1. **unit_profile**: per-voice Osc A and Osc B tuning, VCA gain, envelope-time and cutoff
+   offsets (`unit.vN.*`, A-UNIT-01), solved iteratively from C08. Mean level,
+   mean envelope time and mean cutoff are left to the session gain, the
+   envelope fit and the cutoff-map fit.
 2. **osc_hf**: 3340 reset time (high-frequency tracking) from C02.
 3. **resonance**: onset knob position and maximum loop gain, both models, from C04.
-4. **cutoff_map**: cutoff range, Rev3 scale and voice 1's own cutoff offset,
-   from C03.
+4. **cutoff_map**: cutoff range and Rev3 scale, from C03.
 5. **envelopes**: attack/decay/release ranges and the shared taper, from C05.
 6. **polymod**: Poly Mod range and amount taper, from C06.
 7. **lfo**: LFO range and modulation depth range, from C07.
@@ -136,6 +136,22 @@ own tolerance, so they are effective values for the measured unit rather than
 
 `fitted.cal` loads straight into the engine: `calibration <file>` in a
 scenario, or `CalibrationModel::loadFromFile`.
+
+### Identifiability lessons built into the corpus
+
+* A single voice's cutoff offset is indistinguishable from scaling the whole
+  cutoff range: an offset of 0.8 semitones fitted equally well as a 5 %
+  range change. C08 therefore measures every voice's cutoff, so each voice's
+  offset is pinned relative to the voice average and the global map becomes
+  identifiable.
+* The validation-only sync-sweep test (C09) exposed that the first corpus
+  never measured each voice's Osc B tuning: a sync timbre depends on the A/B
+  pitch ratio, so an unmeasured Osc B offset showed up as a 3 % spectral
+  error. C08 now includes Osc B strikes. Validation-only tests exist to
+  catch exactly this kind of gap.
+* The same applies, more weakly, to the 3340 high-frequency tracking
+  constant, which is seen only through voice 1. It is reported as an
+  effective value for that voice.
 
 ## 5. Self-test
 

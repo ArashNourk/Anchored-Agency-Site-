@@ -259,7 +259,21 @@ def ex_onset_sweep(x, fs, s):
     return {"onset_knob": knobs, "level_db": holds}
 
 
+def ex_fp_selfosc(x, fs, s):
+    """Per-voice self-oscillation frequency (semitones) minus the key offset."""
+    out = []
+    w0, wd = s["window"]
+    for a, note in zip(s["onsets"], s["notes"]):
+        y = seg(x, fs, a + w0, wd)
+        mag, df = spectrum(y, fs)
+        k = 1 + int(np.argmax(mag[1:int(15000 / df)]))
+        pos, _ = interp_peak(mag, k)
+        out.append(12 * np.log2(max(pos * df, 1.0)) - (note - 60))
+    return {"cutoff_semis": out}
+
+
 EXTRACTORS = {
+    "fp_selfosc": ex_fp_selfosc,
     "onset_sweep": ex_onset_sweep,
     "level": ex_level, "pitch": ex_pitch, "harmonics": ex_harmonics, "selfosc": ex_selfosc,
     "level_floor": ex_level_floor, "env_attack": ex_env_attack, "env_decay": ex_env_decay,

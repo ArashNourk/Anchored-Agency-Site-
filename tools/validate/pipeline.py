@@ -112,7 +112,7 @@ def cyclic_shift(test, hw):
     cyc = test.get("cyclic")
     if not cyc:
         return 0
-    feats = cyc["features"]
+    feats = cyc.get("match", cyc["features"])
     anchor = cyc["anchor"]
     n = len(hw[feats[0]])
     best, best_s = None, 0
@@ -230,16 +230,26 @@ def fit_voice_profile(group, hw0, overrides, iters=3, log=print):
         dc = np.array(h["fp.cents"]) - np.array(emu["fp.cents"])
         dl = np.array(h["fp.level_db"]) - np.array(emu["fp.level_db"])
         dd = np.array(h["fp.ln_decay"]) - np.array(emu["fp.ln_decay"])
+        dk = np.array(h["fpc.cutoff_semis"]) - np.array(emu["fpc.cutoff_semis"])
+        db = np.array(h["fpb.cents"]) - np.array(emu["fpb.cents"])
         dl -= np.nanmean(dl)   # global level belongs to the session gain
         dd -= np.nanmean(dd)   # global envelope time belongs to the envelope fit
+        dk -= np.nanmean(dk)   # global cutoff belongs to the cutoff-map fit
         for v in range(len(dc)):
-            for key, d in (("tuneCentsA", dc[v]), ("vcaGainDb", dl[v]), ("ampEnvTimeLn", dd[v])):
+            for key, d in (("tuneCentsA", dc[v]), ("tuneCentsB", db[v]), ("vcaGainDb", dl[v]),
+                           ("ampEnvTimeLn", dd[v]), ("cutoffSemis", dk[v])):
                 if np.isfinite(d):
                     k = f"unit.v{v + 1}.{key}"
                     o[k] = o.get(k, 0.0) + float(d)
         log(f"    iteration {it + 1}: rotation {s}, max |pitch error| {np.nanmax(np.abs(dc)):.3f} c, "
-            f"max |level error| {np.nanmax(np.abs(dl)):.3f} dB, max |decay error| {np.nanmax(np.abs(dd)):.4f}")
+            f"max |level error| {np.nanmax(np.abs(dl)):.3f} dB, max |decay error| {np.nanmax(np.abs(dd)):.4f}, "
+            f"max |cutoff error| {np.nanmax(np.abs(dk)):.3f} st, max |Osc B pitch error| {np.nanmax(np.abs(db)):.3f} c")
     return o
+
+
+# Sum of squared tolerance-normalised residuals below which a group counts as
+# fitted (every residual well inside its tolerance).
+CONVERGED = 0.05
 
 
 def fit(hw, overrides=None, groups=None, passes=2, restarts=2, log=print):
@@ -276,9 +286,12 @@ def fit(hw, overrides=None, groups=None, passes=2, restarts=2, log=print):
                 u = [_to_u(p, o.get(p["key"], defaults[p["key"]])) for p in ps]
                 before = f(np.array(u))
                 val = before
+                if before < CONVERGED:
+                    log(f"  {g['name']}: already within tolerance (cost {before:.3f}), unchanged")
+                    continue
                 for r in range(restarts):
                     u, val = nelder_mead(f, u, step=0.15 / (r + 1), iters=40 * len(ps), pool=pool)
-                    if val < 1e-6:
+                    if val < CONVERGED:
                         break
                 for p, ui in zip(ps, u):
                     o[p["key"]] = _to_x(p, float(ui))

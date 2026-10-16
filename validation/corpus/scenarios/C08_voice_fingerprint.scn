@@ -74,4 +74,60 @@ at 13.6 set A.unison 1
 at 13.6 set A.unison_voices 1
 at 13.7 on 60 100
 at 14.0 off 60
-length 14.6
+# Per-voice filter identity: each key (and so each voice, see A-VAL-02)
+# self-oscillates once; keyboard tracking full, so the oscillation frequency
+# minus the key offset is that voice's cutoff offset.
+at 14.3 set A.unison 0
+at 14.3 set A.mix_osca 0
+at 14.3 set A.flt_resonance 1
+at 14.3 set A.flt_cutoff 0.5
+at 14.3 set A.aenv_sustain 1
+at 14.3 set A.aenv_release 0.1
+at 14.5 on 60 100
+at 15.2 off 60
+at 15.3 on 61 100
+at 16.0 off 61
+at 16.1 on 62 100
+at 16.8 off 62
+at 16.9 on 63 100
+at 17.6 off 63
+at 17.7 on 64 100
+at 18.4 off 64
+at 18.5 on 65 100
+at 19.2 off 65
+at 19.3 on 66 100
+at 20.0 off 66
+at 20.1 on 67 100
+at 20.8 off 67
+at 20.9 on 68 100
+at 21.6 off 68
+at 21.7 on 69 100
+at 22.4 off 69
+# Per-voice Osc B pitch: same strikes with Osc B alone (sync timbre depends
+# on each voice's A/B tuning difference).
+at 22.6 set A.flt_resonance 0
+at 22.6 set A.flt_cutoff 0.85
+at 22.6 set A.mix_oscb 0.8
+at 22.6 set A.aenv_sustain 0
+at 22.6 set A.aenv_release 0.3
+at 23.0 on 60 100
+at 23.3 off 60
+at 23.45 on 61 100
+at 23.75 off 61
+at 23.9 on 62 100
+at 24.2 off 62
+at 24.35 on 63 100
+at 24.65 off 63
+at 24.8 on 64 100
+at 25.1 off 64
+at 25.25 on 65 100
+at 25.55 off 65
+at 25.7 on 66 100
+at 26.0 off 66
+at 26.15 on 67 100
+at 26.45 off 67
+at 26.6 on 68 100
+at 26.9 off 68
+at 27.05 on 69 100
+at 27.35 off 69
+length 28
