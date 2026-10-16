@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>P10 Polysynth</title>
+<title>ابوالفضل</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Michroma&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Michroma&family=Vazirmatn:wght@600;800&display=swap">
 <style>
 /* Layout: one instrument panel. Header strip (power, programs, layers) ->
    synthesis sections left to right in signal-flow order, wrapping on narrow
@@ -33,6 +33,7 @@
   --display-bg: #11171c;
   --display-fg: #ffb547;
   --font-display: "Michroma", "Eurostile", "Arial Narrow", sans-serif;
+  --font-name: "Vazirmatn", "Noto Naskh Arabic", "Geeza Pro", "Tahoma", sans-serif;
   --font-label: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
@@ -72,6 +73,7 @@ button, select, input, textarea { font: inherit; color: inherit; }
 /* ---- header strip ---- */
 .strip { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 12px 16px; border-bottom: 1px solid var(--rule); }
 .wordmark { font-family: var(--font-display); font-size: 22px; letter-spacing: .08em; line-height: 1; display: flex; align-items: baseline; gap: 10px; }
+.wordmark .name { font-family: var(--font-name); font-weight: 800; font-size: 26px; letter-spacing: 0; }
 .wordmark small { font-family: var(--font-label); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
 .power { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 4px; border: 1px solid var(--rule); background: var(--well); cursor: pointer; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; }
 .power .lamp { width: 10px; height: 10px; border-radius: 50%; background: var(--led-off); }
@@ -164,7 +166,7 @@ details.tray summary { cursor: pointer; font-size: 12px; letter-spacing: .16em; 
 <body>
 <div class="instrument" id="instrument">
   <header class="strip">
-    <div class="wordmark">P10 <small>10-voice analog model</small></div>
+    <div class="wordmark"><span class="name" lang="fa" dir="rtl">ابوالفضل</span><small>10-voice analog synthesizer</small></div>
     <button class="power" id="power" aria-pressed="false"><span class="lamp"></span><span id="power-label">Power on</span></button>
     <div class="display grow">
       <select id="program-select" aria-label="Program"></select>

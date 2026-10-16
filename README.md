@@ -1,4 +1,8 @@
-# p10 — a Prophet-10 Rev4 behavioural model
+# ابوالفضل (Abolfazl)
+
+A ten-voice analog synthesizer modelled on the Prophet-10 Rev4. In the code
+the engine keeps its short internal prefix `p10` (namespace, binaries, file
+names); ابوالفضل is the instrument's name.
 
 A virtual analog synthesizer engine whose behavioural specification is the
 Sequential Prophet-10 Rev4: ten persistent analog-modelled voices, each with
