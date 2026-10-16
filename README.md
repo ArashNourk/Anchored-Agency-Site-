@@ -31,9 +31,9 @@ input with MIDI learn.
 
 * Prebuilt: serve `web/dist/` and open it, e.g.
   `python3 -m http.server -d web/dist 8000`, then visit
-  http://localhost:8000 in Chrome, Edge, Firefox or Safari. (Opening the file
-  directly from disk also works in most browsers; Web MIDI needs `localhost`
-  or https.)
+  http://localhost:8000 in a current desktop browser (tested in Chromium).
+  Serve it rather than opening the file from disk: audio worklets and Web
+  MIDI need `localhost` or https.
 * Press **Power on**, then play with the on-screen keys, `Z`–`M` / `Q`–`U`,
   or a MIDI keyboard.
 * Rebuild after engine changes: activate emsdk, then `web/build.sh`.
